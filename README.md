@@ -8,7 +8,7 @@ The library itself consists of useful functions I'll add over time. Standard alg
 It also has some functions for graphics in src/graphics.c that have been added. But graphics.c is a bad name for it as it also contains the wait function that waits int multiples of 1/8th of a secound.
 
 
-## If you want to play my horrible tetris clone you can download it[here](https://github.com/HeronErin/LibTi84/raw/master/games/tetris/tetris.8xp)
+If you want to play my horrible tetris clone you can download it [here](https://github.com/HeronErin/LibTi84/raw/master/games/tetris/tetris.8xp)
 
 
 Make it work
