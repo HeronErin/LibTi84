@@ -1,7 +1,7 @@
-LibTI
+LibTI84
 =====
 
-LibTI is a C library for TI-based calculators. It relies on SDCC and a bunch of tools to compile to the TI-84+.
+LibTI84 is a C library for TI-based calculators. It relies on SDCC and a bunch of tools to compile to the TI-84+.
 
 The library itself consists of useful functions I'll add over time. Standard algorithms will stay close to the C stdlib, but glue functions (such as the IO ones in src/cio.h) most probably won't!
 
