@@ -23,6 +23,8 @@ In case you happen to want to make it work, here's some tips:
 
 
 
+_I am not the origin of this tool, I stole the base of this from the original (LibTi)[(https://github.com/azertyfun/LibTI)]_
+
 
 Some useful resource
 ------------
