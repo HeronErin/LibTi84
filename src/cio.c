@@ -71,7 +71,7 @@ void println(char* s) {
 }
 
 //This function only supports \n, no fancy variable integration or whatever.
-void printf(char* s) {
+void tprintf(char* s) {
 	#define i __cio__i
 	#define length __cio__j
 
@@ -80,6 +80,7 @@ void printf(char* s) {
 		if(*(s + i) == '\n') {
 			newline();
 			setPenRow(__cio__current_line);
+            break;
 		}
 		else
 			printc(*(s + i));

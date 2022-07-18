@@ -1,6 +1,6 @@
 helloworld: helloworld.ihx
 	objcopy -Iihex -Obinary helloworld.ihx helloworld.bin
-	python binpac8x.py helloworld.bin
+	python binpac8x.py helloworld.bin -O fast
 	#packihx helloworld.ihx > helloworld.hex
 
 %.ihx:
