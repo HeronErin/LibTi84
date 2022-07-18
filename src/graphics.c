@@ -58,7 +58,7 @@ void number(int x){
 
 }
 
-void wait(char x){
+void wait(unsigned char x){ // Wait for amount of time (1/8th of sec)
     x;
     __asm
        di
@@ -77,6 +77,26 @@ void wait(char x){
        out (#0x31),a
    __endasm;
 }
+void wait128(unsigned char x){ // Wait for amount of time (1/128th of sec)
+    x;
+    __asm
+       di
+       ld a,#0x46      ;128 hz
+       out (#0x30),a
+       ld a,#0x00        ; no loop, no interrupt
+       out (#0x31),a
+       ld a,4(ix)       
+       out (#0x32),a
+    wait2:
+       in a,(4)
+       bit 5,a       ;bit 5 tells if timer 1
+       jr z,wait2     ;is done
+       xor a
+       out (#0x30),a   ;Turn off the timer.
+       out (#0x31),a
+   __endasm;
+}
+
 
 void swap(){bcall(0x486A);}
 
