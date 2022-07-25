@@ -1,5 +1,5 @@
 export MAINC="main.c"
-export OUT_NAME="tetris"
+export OUT_NAME="underfight"
 
 
 sdasz80 -p -g -o tios_crt0.rel tios_crt0.s

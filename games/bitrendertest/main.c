@@ -14,7 +14,6 @@ char* eye_img;
 
 #define VARBIN        0x9872
 
-
 #define memmk(name, type)  type* name = (type*)(Vtrack); Vtrack+=sizeof(type);
 
 void drawbitmap(int x, int y, int width, int height){

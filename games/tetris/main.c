@@ -1,13 +1,47 @@
-#include "../../src/libti.c"
+
 
 #include <stdbool.h>
 
+#define V_H_LINES
+#define WAIT_8
+#define RENDER_NUMS
+#define USE_TPRINT
+
+
+
+
+// int __clib__i;
+// int __clib__j;
+// int __clib__returnval;
+// char __clib__c;
+
+// int __cio__returnValue;
+
+// char __cio__current_line = 0;
+
+// int cio__i;
+// int cio__j;
+
+// char __cio__buffer[16];
+// int returnValue;
+
+
+#include "../../src/setting.h"
+#include "../../src/libti.c"
+
 #include "../../src/graphics.c"
+
+
+
 int* pieces;
 char* map;
 
 
 
+
+// Online C Compiler - Build, Compile and Run your C programs online in your favorite browser
+
+#include<stdio.h>
 
 
 
@@ -179,8 +213,6 @@ int getfull(){
 }
 void main() {
     init_graphics();
-
-
 
     int ps[] = {
          0, 0,  1, 0,  0, 1,   1, 1 // 0 peice

@@ -1,9 +1,7 @@
-#ifndef __CIO_C__
-#define __CIO_C__
+#pragma once
 
 #include "cio.h"
-
-void clearscreen() {
+void clearscreen(){
 	bcall(_clrlcdf);
 	resetcursor();
 }
@@ -35,7 +33,7 @@ void setPenRow(char row) {
 		ld (penrow), a
 	__endasm;
 }
-
+#ifdef USE_PUT
 void vputs(char* s) {
 	s;
 	__asm
@@ -53,7 +51,8 @@ void vputc(char c) {
 	__endasm;
 	bcall(_vputmap);
 }
-
+#endif
+#ifdef USE_PRINT_FUNCS
 void printc(char c) {
 	setPenRow(__cio__current_line);
 	vputc(c);
@@ -69,8 +68,10 @@ void println(char* s) {
 	print(s);
 	newline();
 }
+#endif
 
 //This function only supports \n, no fancy variable integration or whatever.
+#ifdef USE_TPRINT
 void tprintf(char* s) {
 	#define i __cio__i
 	#define length __cio__j
@@ -89,13 +90,14 @@ void tprintf(char* s) {
 	#undef i
 	#undef length
 }
+#endif
 
 int getKey() {
 	bcall(_getkey);
 	assignAToVar(&__cio__returnValue);
 	return __cio__returnValue;
 }
-
+#ifdef USE_GET_INT
 int getInt() {
 	#define i __cio__i
 	#define key __cio__j

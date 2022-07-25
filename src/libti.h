@@ -1,5 +1,4 @@
-#ifndef __LIBTI_H__
-#define __LIBTI_H__
+#pragma once
 
 #include "ti84p_mappings.h"
 
@@ -14,4 +13,3 @@ void assignAToVar(int*);
 #include "clib.c"
 #include "cio.c"
 
-#endif
