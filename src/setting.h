@@ -1,3 +1,8 @@
+
+#ifdef MAKE_MENUS
+#define RENDER_NUMS
+#endif
+
 #ifdef USE_TPRINT
 #define USE_PRINT_FUNCS
 #define USE_STR_LEN

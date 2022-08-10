@@ -48,9 +48,42 @@ void d3line(slong x, slong y, slong z, slong x2, slong y2, slong z2){
 
 }
 
+void renderObj(int plen, int llen, int* points, int* lines){
+    int *rms = (int*)Vtrack;
+    int rc = 0;
+    for (int i = 0; i < plen/3*2; i+=3){
 
+        projectNoRot(points[i],  points[i+1],  points[i+2], output1);
+        // number(output1->x);
+        // printc('+');
+        // number(output1->y);
 
+        // newline();
+        if (output1->x != -69420 && output2->x != -69420){
+            rms[rc] = output1->x;
+            rms[rc+1] = output1->y;
+        }else{
+            rms[rc] = 0;
+            rms[rc+1] = 0;
+        }
+        rc+=2;
+    }
+    for (int i =0; i < llen; i+=2){
+        int pi = lines[i]-1, pi2 = lines[i+1]-1;
+        line(rms[pi*2], rms[pi*2+1], rms[pi2*2], rms[pi2*2+1]);
+        // number(rms[pi*2]);
+        // printc('+');
+        // number(rms[pi*2+1]);
+        // printc('-');
+        // number(rms[pi*2]);
+        // printc('+');
+        // number(rms[pi*2+1]);
+        // newline();
+        // break;
+    }
+}
 void main() {
+    #include "rooms.c"
     init_graphics();
     clearscreen();
     badclr();
@@ -113,16 +146,16 @@ void main() {
 
             update = false;
             badclr();
+            renderObj(12, 16, points, lines);
+            // for (int i = 0; i < 5; i++){
+            //  d3line(-4, 4, i+2+camPos->z, 4, 4, i+2+camPos->z);
+            //  d3line(-4, 4, i+2+camPos->z, -4, 4, i+3+camPos->z);
+            //  d3line(4, 4, i+2+camPos->z, 4, 4, i+3+camPos->z);
+            //  d3line(-4, -1, i+1, 4, -1, i+1);
 
-            for (int i = 0; i < 5; i++){
-             d3line(-4, 4, i+2+camPos->z, 4, 4, i+2+camPos->z);
-             d3line(-4, 4, i+2+camPos->z, -4, 4, i+3+camPos->z);
-             d3line(4, 4, i+2+camPos->z, 4, 4, i+3+camPos->z);
-             // d3line(-4, -1, i+1, 4, -1, i+1);
-
-             // d3line(-4, 4, i+1, -4, -1, i+1);
-             // d3line(4, 4, i+1, 4, -1, i+1);   
-            }
+            //  d3line(-4, 4, i+1, -4, -1, i+1);
+            //  d3line(4, 4, i+1, 4, -1, i+1);   
+            // }
             // d3line(10, 10, 10, 10, 10, 20);
             // d3line(10, 0, 10, 10, 0, 20);
             // d3line(10, 10, 10, 10, 0, 10);
@@ -133,7 +166,7 @@ void main() {
             // d3line(50, 10, 10, 50, 0, 10);
             // d3line(50, 10, 20, 50, 0, 20);
             swap();
-            number(camPos->z);
+            // number(camPos->z);
             resetcursor();
 
         }

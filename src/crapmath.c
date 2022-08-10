@@ -99,7 +99,7 @@ struct Vec2{
 };
 #endif
 #ifdef PROJ_NO_ROT
-void projectNoRot(slong x, slong y, slong z, struct Vec2 *out){
+void projectNoRot(slong x, slong z, slong y, struct Vec2 *out){
     x = camPos->x - x;
     y = camPos->y - y;
     z = camPos->z - z;

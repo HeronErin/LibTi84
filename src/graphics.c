@@ -175,9 +175,7 @@ void swap(){
 
 int getKeyId(){
     bcall(0x4015);
-    int x = (int)(*((char*)(0x843F)));
-
-    return x;}
+    return (int)(*((char*)(0x843F)));}
 
 #define SCREEN_BUFFER 0x9340
     
@@ -204,6 +202,49 @@ void reviveScreenFromAppBackup(){
 
 #endif
 
+
+#ifdef USE_GET_RANDOM
+void resetRandomSeed(){
+    bcall(0x4B7F);
+}
+int randomInt(){
+    int x = 0;
+    bcall(0x4B79);
+    assignAToVar(&x);
+    return x;
+}
+
+#endif
+
+// void getTime(){
+//     for (int i =0; i < 2; i++){ 
+//         __asm
+//         ld de,(#0x84AF)
+//         push de
+//             ld a,0x3F(iy)
+//             push af
+//                 set 4,0x3F(iy)
+                
+//                 __endasm;
+//                     bcall(0x515E);
+//                     print((char*)(0x84AF+1));
+//                     printc('!');
+//                     newline();
+//                     // if (*((char*)(0x84AF+1)) == ':'){
+//                     //     printc('!');
+//                     // }
+//                 __asm
+//                 pop af
+//             ld 0x3F(iy),a
+//             pop hl
+//         __endasm;
+//     }
+
+//     // printc('a')
+//     // bcall(_vputs);
+//     printc(';');
+
+// }
 
 
 /////////////////////   buff = (char*)(SCREEN_BUFFER);
