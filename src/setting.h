@@ -1,4 +1,18 @@
 
+#ifdef TANS_PRE
+#define USE_ABS_INT
+#endif
+#ifdef COS_PRE
+#define USE_ABS_INT
+#endif
+#ifdef SIN_PRE
+#define USE_ABS_INT
+#endif
+
+
+
+
+
 #ifdef MAKE_MENUS
 #define RENDER_NUMS
 #endif

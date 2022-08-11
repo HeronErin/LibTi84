@@ -68,6 +68,27 @@ int absint(int x){
 }
 #endif
 
+#ifdef TANS_PRE
+short int tans[] = {0, 17, 36, 57, 83, 119, 173, 274, 567, 1000, -567, -274, -173, -119, -83, -57, -36, -17, 0, 17, 36, 57, 83, 119, 173, 274, 567, 1000, -567, -274, -173, -119, -83, -57, -36, -17};
+int getTan(int deg){
+    int adeg = absint(deg);
+    return (deg/adeg)*tans[adeg%360/10];
+}
+#endif
+#ifdef COS_PRE
+signed char cosses[] = {100, 98, 93, 86, 76, 64, 50, 34, 17, 0, -17, -34, -49, -64, -76, -86, -93, -98, -100, -98, -93, -86, -76, -64, -50, -34, -17, 0, 17, 34, 50, 64, 76, 86, 93, 98};
+int getCos(int deg){
+    return cosses[absint(deg)%360/10];
+}
+#endif
+#ifdef SIN_PRE
+signed char sins[] = {0, 17, 34, 49, 64, 76, 86, 93, 98, 100, 98, 93, 86, 76, 64, 49, 34, 17, 0, -17, -34, -50, -64, -76, -86, -93, -98, -100, -98, -93, -86, -76, -64, -50, -34, -17};
+int getSin(int deg){
+    int adeg = absint(deg);
+    return (deg/adeg)*((int)sins[adeg%360/10]);
+}
+#endif
+
 
 
 #ifdef MIN_MAX
