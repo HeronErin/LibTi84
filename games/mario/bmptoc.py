@@ -1,7 +1,7 @@
 from PIL import Image
 import struct, os
 # open method used to open different extension image file
-for inur in ['act.bmp', 'heart1.bmp', 'itm.bmp', 'gui1.bmp', 'attack.bmp', 'sanHead.bmp']:
+for inur in ['sp1.bmp', 'sp2.bmp']:
 	im = Image.open(os.path.join("bmps", inur)) 
 	full = []
 	def hexify(x):

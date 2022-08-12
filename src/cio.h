@@ -26,6 +26,7 @@ void newline();
 void setPenCol(char);
 void setPenRow(char);
 
+void vputc(char c);
 void vputs(char*);
 
 void print(char*);
@@ -36,4 +37,7 @@ int getKey();
 
 int getInt();
 
+
+
+void tprintf(char* s);
 #endif

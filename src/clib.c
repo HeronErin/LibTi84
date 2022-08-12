@@ -1,8 +1,6 @@
-#ifndef __CLIB_C__
-#define __CLIB_C__
+#pragma once
 
-#include "clib.h"
-
+#ifdef USE_STR_LEN
 int strlen(char s[]) {
 	#define i __clib__i
 
@@ -13,7 +11,8 @@ int strlen(char s[]) {
 
 	#undef i
 }
-
+#endif
+#ifdef STR_FUNCS
 void strcpy(char* dest, char* source) {
 	int i = 0; //In this kind of function we want to avoid var reuse collision
 	while(1) {
@@ -97,5 +96,4 @@ int atoi(char *p) {
 
 	#undef k
 }
-
 #endif
