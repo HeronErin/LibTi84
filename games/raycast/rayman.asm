@@ -19,8 +19,9 @@
 	.globl _line
 	.globl _setpix
 	.globl _pixpos
+	.globl _min
+	.globl _max
 	.globl _absint
-	.globl _isqrt
 	.globl _printc
 	.globl ___cio__current_line
 	.globl _Vtrack
@@ -312,307 +313,6 @@ _assignAToVar::
 ;../../src/libti.c:17: }
 	pop	ix
 	ret
-;../../src/crapmath.c:20: unsigned long isqrt(unsigned int x){
-;	---------------------------------
-; Function isqrt
-; ---------------------------------
-_isqrt::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-	ld	hl, #-20
-	add	hl, sp
-	ld	sp, hl
-;../../src/crapmath.c:21: for (unsigned long i = 0; i < x; i+=10){
-	xor	a, a
-	ld	-20 (ix), a
-	ld	-19 (ix), a
-	ld	-18 (ix), a
-	ld	-17 (ix), a
-	xor	a, a
-	ld	-8 (ix), a
-	ld	-7 (ix), a
-	ld	-6 (ix), a
-	ld	-5 (ix), a
-	xor	a, a
-	ld	-4 (ix), a
-	ld	-3 (ix), a
-	ld	-2 (ix), a
-	ld	-1 (ix), a
-00113$:
-	ld	a, 4 (ix)
-	ld	-16 (ix), a
-	ld	a, 5 (ix)
-	ld	-15 (ix), a
-	xor	a, a
-	ld	-14 (ix), a
-	ld	-13 (ix), a
-	ld	a, -8 (ix)
-	sub	a, -16 (ix)
-	ld	a, -7 (ix)
-	sbc	a, -15 (ix)
-	ld	a, -6 (ix)
-	sbc	a, -14 (ix)
-	ld	a, -5 (ix)
-	sbc	a, -13 (ix)
-	jp	NC, 00115$
-;../../src/crapmath.c:23: unsigned long b = (i/10)*(i/10);
-	ld	l, -2 (ix)
-	ld	h, -1 (ix)
-	push	hl
-	ld	l, -4 (ix)
-	ld	h, -3 (ix)
-	push	hl
-	ld	l, -2 (ix)
-	ld	h, -1 (ix)
-	push	hl
-	ld	l, -4 (ix)
-	ld	h, -3 (ix)
-	push	hl
-	call	__mullong
-	pop	af
-	pop	af
-	pop	af
-	pop	af
-	ld	-12 (ix), l
-	ld	-11 (ix), h
-	ld	-10 (ix), e
-	ld	-9 (ix), d
-;../../src/crapmath.c:25: if (b == x)
-	ld	a, -12 (ix)
-	sub	a, -16 (ix)
-	jr	NZ,00102$
-	ld	a, -11 (ix)
-	sub	a, -15 (ix)
-	jr	NZ,00102$
-	ld	a, -10 (ix)
-	sub	a, -14 (ix)
-	jr	NZ,00102$
-	ld	a, -9 (ix)
-	sub	a, -13 (ix)
-	jr	NZ,00102$
-;../../src/crapmath.c:26: return i;
-	ld	l, -20 (ix)
-	ld	h, -19 (ix)
-	ld	e, -18 (ix)
-	ld	d, -17 (ix)
-	jp	00115$
-00102$:
-;../../src/crapmath.c:28: if (b > x){
-	ld	a, -16 (ix)
-	sub	a, -12 (ix)
-	ld	a, -15 (ix)
-	sbc	a, -11 (ix)
-	ld	a, -14 (ix)
-	sbc	a, -10 (ix)
-	ld	a, -13 (ix)
-	sbc	a, -9 (ix)
-	jp	NC, 00114$
-;../../src/crapmath.c:30: unsigned long c = (i-10);
-	ld	a, -20 (ix)
-	add	a, #0xf6
-	ld	-4 (ix), a
-	ld	a, -19 (ix)
-	adc	a, #0xff
-	ld	-3 (ix), a
-	ld	a, -18 (ix)
-	adc	a, #0xff
-	ld	-2 (ix), a
-	ld	a, -17 (ix)
-	adc	a, #0xff
-	ld	-1 (ix), a
-;../../src/crapmath.c:36: for (unsigned int per = 1; per < 10; ++per){
-	ld	-8 (ix), #0x01
-	xor	a, a
-	ld	-7 (ix), a
-	ld	-6 (ix), #0x01
-	xor	a, a
-	ld	-5 (ix), a
-00110$:
-	ld	a, -6 (ix)
-	sub	a, #0x0a
-	ld	a, -5 (ix)
-	sbc	a, #0x00
-	jp	NC, 00105$
-;../../src/crapmath.c:38: unsigned long d = c+(per*10*100);
-	ld	c, -6 (ix)
-	ld	b, -5 (ix)
-	ld	l, c
-	ld	h, b
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	ld	bc, #0x0000
-	ld	a, l
-	add	a, -4 (ix)
-	ld	e, a
-	ld	a, h
-	adc	a, -3 (ix)
-	ld	d, a
-	ld	a, c
-	adc	a, -2 (ix)
-	ld	c, a
-	ld	a, b
-	adc	a, -1 (ix)
-	ld	b, a
-;../../src/crapmath.c:42: d=d*d/10000;
-	push	bc
-	push	de
-	push	bc
-	push	de
-	call	__mullong
-	pop	af
-	pop	af
-	pop	af
-	pop	af
-	ld	c, l
-	ld	b, h
-	ld	hl, #0x0000
-	push	hl
-	ld	hl, #0x2710
-	push	hl
-	push	de
-	push	bc
-	call	__divulong
-	pop	af
-	pop	af
-	pop	af
-	pop	af
-	ld	c, l
-	ld	b, h
-;../../src/crapmath.c:44: if (d > x){
-	ld	a, -16 (ix)
-	sub	a, c
-	ld	a, -15 (ix)
-	sbc	a, b
-	ld	a, -14 (ix)
-	sbc	a, e
-	ld	a, -13 (ix)
-	sbc	a, d
-	jr	NC,00111$
-;../../src/crapmath.c:45: c += ((per-1)*10*100);
-	ld	a, -8 (ix)
-	add	a, #0xff
-	ld	-6 (ix), a
-	ld	a, -7 (ix)
-	adc	a, #0xff
-	ld	-5 (ix), a
-	ld	c, -6 (ix)
-	ld	b, -5 (ix)
-	ld	l, c
-	ld	h, b
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	ld	-6 (ix), l
-	ld	-5 (ix), h
-	ld	a, -6 (ix)
-	ld	-8 (ix), a
-	ld	a, -5 (ix)
-	ld	-7 (ix), a
-	xor	a, a
-	ld	-6 (ix), a
-	ld	-5 (ix), a
-	ld	a, -8 (ix)
-	add	a, -4 (ix)
-	ld	-4 (ix), a
-	ld	a, -7 (ix)
-	adc	a, -3 (ix)
-	ld	-3 (ix), a
-	ld	a, -6 (ix)
-	adc	a, -2 (ix)
-	ld	-2 (ix), a
-	ld	a, -5 (ix)
-	adc	a, -1 (ix)
-	ld	-1 (ix), a
-;../../src/crapmath.c:47: break;
-	jr	00105$
-00111$:
-;../../src/crapmath.c:36: for (unsigned int per = 1; per < 10; ++per){
-	inc	-6 (ix)
-	jr	NZ,00154$
-	inc	-5 (ix)
-00154$:
-	ld	a, -6 (ix)
-	ld	-8 (ix), a
-	ld	a, -5 (ix)
-	ld	-7 (ix), a
-	jp	00110$
-00105$:
-;../../src/crapmath.c:52: return c/10;
-	ld	hl, #0x0000
-	push	hl
-	ld	hl, #0x000a
-	push	hl
-	ld	l, -2 (ix)
-	ld	h, -1 (ix)
-	push	hl
-	ld	l, -4 (ix)
-	ld	h, -3 (ix)
-	push	hl
-	call	__divulong
-	pop	af
-	pop	af
-	pop	af
-	pop	af
-	jr	00115$
-00114$:
-;../../src/crapmath.c:21: for (unsigned long i = 0; i < x; i+=10){
-	inc	-4 (ix)
-	jr	NZ,00155$
-	inc	-3 (ix)
-	jr	NZ,00155$
-	inc	-2 (ix)
-	jr	NZ,00155$
-	inc	-1 (ix)
-00155$:
-	ld	a, -8 (ix)
-	add	a, #0x0a
-	ld	-8 (ix), a
-	ld	a, -7 (ix)
-	adc	a, #0x00
-	ld	-7 (ix), a
-	ld	a, -6 (ix)
-	adc	a, #0x00
-	ld	-6 (ix), a
-	jr	NC,00156$
-	inc	-5 (ix)
-00156$:
-	ld	hl, #0
-	add	hl, sp
-	ex	de, hl
-	ld	hl, #12
-	add	hl, sp
-	ld	bc, #4
-	ldir
-	jp	00113$
-00115$:
-;../../src/crapmath.c:55: }
-	ld	sp, ix
-	pop	ix
-	ret
 ;../../src/crapmath.c:120: int absint(int x){
 ;	---------------------------------
 ; Function absint
@@ -640,6 +340,64 @@ _absint::
 	ld	h, 5 (ix)
 00103$:
 ;../../src/crapmath.c:125: }
+	pop	ix
+	ret
+;../../src/crapmath.c:152: int max(int x, int y){
+;	---------------------------------
+; Function max
+; ---------------------------------
+_max::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+;../../src/crapmath.c:153: if (x<y){
+	ld	a, 4 (ix)
+	sub	a, 6 (ix)
+	ld	a, 5 (ix)
+	sbc	a, 7 (ix)
+	jp	PO, 00110$
+	xor	a, #0x80
+00110$:
+	jp	P, 00102$
+;../../src/crapmath.c:154: return y;
+	ld	l, 6 (ix)
+	ld	h, 7 (ix)
+	jr	00103$
+00102$:
+;../../src/crapmath.c:156: return x;
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+00103$:
+;../../src/crapmath.c:157: }
+	pop	ix
+	ret
+;../../src/crapmath.c:158: int min(int x, int y){
+;	---------------------------------
+; Function min
+; ---------------------------------
+_min::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+;../../src/crapmath.c:159: if (x<y){
+	ld	a, 4 (ix)
+	sub	a, 6 (ix)
+	ld	a, 5 (ix)
+	sbc	a, 7 (ix)
+	jp	PO, 00110$
+	xor	a, #0x80
+00110$:
+	jp	P, 00102$
+;../../src/crapmath.c:160: return x;
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+	jr	00103$
+00102$:
+;../../src/crapmath.c:162: return y;
+	ld	l, 6 (ix)
+	ld	h, 7 (ix)
+00103$:
+;../../src/crapmath.c:163: }
 	pop	ix
 	ret
 ;../../src/graphics.c:15: int pixpos(int x, int y){
@@ -1360,7 +1118,7 @@ _init_graphics::
 	ld	(hl), #0x93
 ;../../src/graphics.c:186: }
 	ret
-;main.c:50: void main() {
+;main.c:51: void main() {
 ;	---------------------------------
 ; Function main
 ; ---------------------------------
@@ -1368,475 +1126,548 @@ _main::
 	push	ix
 	ld	ix,#0
 	add	ix,sp
-	ld	hl, #-68
+	ld	hl, #-84
 	add	hl, sp
 	ld	sp, hl
-;main.c:51: int px = 3;
-	ld	-12 (ix), #0x03
+;main.c:52: int px = 2;
+	ld	-14 (ix), #0x02
+	xor	a, a
+	ld	-13 (ix), a
+;main.c:53: int py = 13;
+	ld	-12 (ix), #0x0d
 	xor	a, a
 	ld	-11 (ix), a
-;main.c:52: int py = 8;
-	ld	-10 (ix), #0x08
+;main.c:54: int rot = 0;
 	xor	a, a
+	ld	-10 (ix), a
 	ld	-9 (ix), a
-;main.c:55: char map[] = {
+;main.c:65: char map[] = {
 	ld	hl, #0
 	add	hl, sp
-	ld	-26 (ix), l
-	ld	-25 (ix), h
+	ld	-36 (ix), l
+	ld	-35 (ix), h
 	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x01
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x02
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x03
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x04
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x05
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x06
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x07
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x08
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x09
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x0a
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x0b
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x0c
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x0d
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x0e
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x0f
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x10
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
 	add	a, #0x11
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x12
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x13
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x14
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
 	add	a, #0x15
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x16
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x17
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x18
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x19
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x1a
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x1b
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x1c
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
 	add	a, #0x1d
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x1e
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x1f
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x20
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
 	add	a, #0x21
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x22
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x23
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
-	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
 	add	a, #0x24
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x01
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x25
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x26
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x27
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x00
-	ld	a, -26 (ix)
+	ld	a, -36 (ix)
 	add	a, #0x28
 	ld	-2 (ix), a
-	ld	a, -25 (ix)
-	adc	a, #0x00
-	ld	-1 (ix), a
-	ld	l, -2 (ix)
-	ld	h, -1 (ix)
-	ld	(hl), #0x00
-	ld	a, -26 (ix)
-	add	a, #0x29
-	ld	-2 (ix), a
-	ld	a, -25 (ix)
+	ld	a, -35 (ix)
 	adc	a, #0x00
 	ld	-1 (ix), a
 	ld	l, -2 (ix)
 	ld	h, -1 (ix)
 	ld	(hl), #0x01
-;main.c:68: clearscreen();
+	ld	a, -36 (ix)
+	add	a, #0x29
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2a
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2b
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2c
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x2d
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2e
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2f
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+;main.c:82: clearscreen();
 	call	_clearscreen
-;main.c:69: init_graphics();
+;main.c:83: init_graphics();
 	call	_init_graphics
-;main.c:92: bool update = true;
-	ld	-24 (ix), #0x01
-;main.c:93: while (true){
-00128$:
-;main.c:95: int key = getKeyId();
+;main.c:106: bool update = true;
+	ld	-34 (ix), #0x01
+;main.c:107: while (true){
+00149$:
+;main.c:109: int key = getKeyId();
 	call	_getKeyId
 	ld	-2 (ix), l
-;main.c:96: if (key != 0){
+;main.c:110: if (key != 0){
 	ld	-1 (ix), h
 	ld	a, h
 	or	a, -2 (ix)
-	jr	Z,00116$
-;main.c:97: if (key == 0x0F){
+	jp	Z, 00119$
+;main.c:111: if (key == 0x0F){
 	ld	a, -2 (ix)
 	sub	a, #0x0f
 	or	a, -1 (ix)
-	jp	Z,00129$
-;main.c:100: else if (key == 1){ // down
+	jp	Z,00150$
+;main.c:114: else if (key == 1){ // down
 	ld	a, -2 (ix)
 	dec	a
 	or	a, -1 (ix)
-	jr	NZ,00110$
-;main.c:101: py+=1;
-	inc	-10 (ix)
-	jr	NZ,00114$
-	inc	-9 (ix)
-	jr	00114$
-00110$:
-;main.c:104: else if (key == 4){ // up
+	jr	NZ,00113$
+;main.c:115: py+=1;
+	inc	-12 (ix)
+	jr	NZ,00117$
+	inc	-11 (ix)
+	jr	00117$
+00113$:
+;main.c:118: else if (key == 4){ // up
 	ld	a, -2 (ix)
 	sub	a, #0x04
 	or	a, -1 (ix)
-	jr	NZ,00107$
-;main.c:105: py-=1;
-	ld	l, -10 (ix)
-	ld	h, -9 (ix)
-	dec	hl
-	ld	-10 (ix), l
-	ld	-9 (ix), h
-	jr	00114$
-00107$:
-;main.c:108: else if (key == 2){ // left
-	ld	a, -2 (ix)
-	sub	a, #0x02
-	or	a, -1 (ix)
-	jr	NZ,00104$
-;main.c:109: px-=1;
+	jr	NZ,00110$
+;main.c:119: py-=1;
 	ld	l, -12 (ix)
 	ld	h, -11 (ix)
 	dec	hl
 	ld	-12 (ix), l
 	ld	-11 (ix), h
-	jr	00114$
-00104$:
-;main.c:111: else if (key == 3){ // right
+	jr	00117$
+00110$:
+;main.c:122: else if (key == 2){ // left
+	ld	a, -2 (ix)
+	sub	a, #0x02
+	or	a, -1 (ix)
+	jr	NZ,00107$
+;main.c:123: px-=1;
+	ld	l, -14 (ix)
+	ld	h, -13 (ix)
+	dec	hl
+	ld	-14 (ix), l
+	ld	-13 (ix), h
+	jr	00117$
+00107$:
+;main.c:125: else if (key == 3){ // right
 	ld	a, -2 (ix)
 	sub	a, #0x03
 	or	a, -1 (ix)
-	jr	NZ,00114$
-;main.c:112: px+=1;
-	inc	-12 (ix)
-	jr	NZ,00252$
-	inc	-11 (ix)
-00252$:
-00114$:
-;main.c:114: update=true;
-	ld	-24 (ix), #0x01
-00116$:
-;main.c:120: if (update){
-	bit	0, -24 (ix)
-	jp	Z, 00128$
-;main.c:121: update=false;
+	jr	NZ,00104$
+;main.c:126: px+=1;
+	inc	-14 (ix)
+	jr	NZ,00117$
+	inc	-13 (ix)
+	jr	00117$
+00104$:
+;main.c:128: else if (key == 0x0A){ // plus
+	ld	a, -2 (ix)
+	sub	a, #0x0a
+	or	a, -1 (ix)
+	jr	NZ,00117$
+;main.c:129: rot+=1;
+	inc	-10 (ix)
+	jr	NZ,00326$
+	inc	-9 (ix)
+00326$:
+00117$:
+;main.c:131: update=true;
+	ld	-34 (ix), #0x01
+00119$:
+;main.c:137: if (update){
+	bit	0, -34 (ix)
+	jp	Z, 00149$
+;main.c:138: update=false;
 	xor	a, a
-	ld	-24 (ix), a
-;main.c:122: badclr();
+	ld	-34 (ix), a
+;main.c:139: badclr();
 	call	_badclr
-;main.c:125: for (int i = 0; i < v; ++i){
-	ld	c, -12 (ix)
-	ld	b, -11 (ix)
+;main.c:142: int oldY = 0;
+	xor	a, a
+	ld	-33 (ix), a
+	ld	-32 (ix), a
+;main.c:143: for (int i = 0; i < v; ++i){
+	ld	c, -14 (ix)
+	ld	b, -13 (ix)
 	ld	l, c
 	ld	h, b
 	add	hl, hl
@@ -1849,10 +1680,10 @@ _main::
 	add	hl, hl
 	ld	de, #0x0032
 	add	hl, de
-	ld	-23 (ix), l
-	ld	-22 (ix), h
-	ld	c, -10 (ix)
-	ld	b, -9 (ix)
+	ld	-31 (ix), l
+	ld	-30 (ix), h
+	ld	c, -12 (ix)
+	ld	b, -11 (ix)
 	ld	l, c
 	ld	h, b
 	add	hl, hl
@@ -1865,21 +1696,21 @@ _main::
 	add	hl, hl
 	ld	de, #0x0064
 	add	hl, de
-	ld	-21 (ix), l
-	ld	-20 (ix), h
+	ld	-29 (ix), l
+	ld	-28 (ix), h
 	xor	a, a
 	ld	-8 (ix), a
 	ld	-7 (ix), a
-00137$:
+00158$:
 	ld	a, -8 (ix)
-	sub	a, #0x60
+	sub	a, #0x10
 	ld	a, -7 (ix)
 	rla
 	ccf
 	rra
 	sbc	a, #0x80
-	jp	NC, 00124$
-;main.c:126: int cameraX = 2 * i*100 / v - 100;
+	jp	NC, 00145$
+;main.c:144: int cameraX = 2 * i*100 / v - 100;
 	ld	c, -8 (ix)
 	ld	b, -7 (ix)
 	ld	l, c
@@ -1893,7 +1724,7 @@ _main::
 	add	hl, hl
 	add	hl, hl
 	add	hl, hl
-	ld	bc, #0x0060
+	ld	bc, #0x0010
 	push	bc
 	push	hl
 	call	__divsint
@@ -1903,49 +1734,53 @@ _main::
 	ld	b, h
 	ld	a, c
 	add	a, #0x9c
-	ld	-14 (ix), a
+	ld	-16 (ix), a
 	ld	a, b
 	adc	a, #0xff
-	ld	-13 (ix), a
-;main.c:127: int rx = ((px*100))+50;
-	ld	a, -23 (ix)
+	ld	-15 (ix), a
+;main.c:145: int rx = ((px*100))+50;
+	ld	a, -31 (ix)
 	ld	-6 (ix), a
-	ld	a, -22 (ix)
+	ld	a, -30 (ix)
 	ld	-5 (ix), a
-;main.c:128: int ry = (py*100)+100;
-	ld	a, -21 (ix)
+;main.c:146: int ry = (py*100)+100;
+	ld	a, -29 (ix)
 	ld	-2 (ix), a
-	ld	a, -20 (ix)
+	ld	a, -28 (ix)
 	ld	-1 (ix), a
-;main.c:132: int rayDirY = cameraX/2;
-	ld	a, -14 (ix)
+;main.c:150: int rayDirY = cameraX/2;
+	ld	a, -16 (ix)
 	ld	-4 (ix), a
-	ld	a, -13 (ix)
+	ld	a, -15 (ix)
 	ld	-3 (ix), a
-	bit	7, -13 (ix)
-	jr	Z,00141$
-	ld	a, -14 (ix)
+	bit	7, -15 (ix)
+	jr	Z,00162$
+	ld	a, -16 (ix)
 	add	a, #0x01
 	ld	-4 (ix), a
-	ld	a, -13 (ix)
+	ld	a, -15 (ix)
 	adc	a, #0x00
 	ld	-3 (ix), a
-00141$:
+00162$:
 	ld	c, -4 (ix)
 	ld	b, -3 (ix)
 	sra	b
 	rr	c
-;main.c:134: for (int yy = 0; yy < 32; ++yy){
+;main.c:151: int toy = 0;
 	xor	a, a
-	ld	-19 (ix), a
-	ld	-18 (ix), a
+	ld	-27 (ix), a
+	ld	-26 (ix), a
+;main.c:152: for (int yy = 0; yy < 64; ++yy){
+	xor	a, a
+	ld	-25 (ix), a
+	ld	-24 (ix), a
 	ld	e, c
 	ld	d, b
 	inc	de
 	ld	a, b
 	rlca
 	and	a,#0x01
-	ld	-17 (ix), a
+	ld	-23 (ix), a
 	ld	a, -2 (ix)
 	ld	-4 (ix), a
 	ld	a, -1 (ix)
@@ -1953,16 +1788,50 @@ _main::
 	xor	a, a
 	ld	-2 (ix), a
 	ld	-1 (ix), a
-00134$:
+00155$:
+;main.c:182: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
+	push	de
+	ld	e, -8 (ix)
+	ld	d, -7 (ix)
+	ld	l, e
+	ld	h, d
+	add	hl, hl
+	add	hl, de
+	add	hl, hl
+	pop	de
+	ld	-22 (ix), l
+	ld	-21 (ix), h
+;main.c:152: for (int yy = 0; yy < 64; ++yy){
 	ld	a, -2 (ix)
-	sub	a, #0x20
+	sub	a, #0x40
 	ld	a, -1 (ix)
 	rla
 	ccf
 	rra
 	sbc	a, #0x80
-	jp	NC, 00138$
-;main.c:135: int orx = rx; int ory = ry; int ama = rx/100 + ((ry)/100*mapX);
+	jp	NC, 00137$
+;main.c:157: rot%=4;
+	push	bc
+	push	de
+	ld	hl, #0x0004
+	push	hl
+	ld	l, -10 (ix)
+	ld	h, -9 (ix)
+	push	hl
+	call	__modsint
+	pop	af
+	pop	af
+	ld	-10 (ix), l
+	ld	-9 (ix), h
+	pop	de
+	pop	bc
+;main.c:159: ama = (0-ry)/100 + ((rx)/100*mapX);
+	xor	a, a
+	sub	a, -4 (ix)
+	ld	-16 (ix), a
+	ld	a, #0x00
+	sbc	a, -3 (ix)
+	ld	-15 (ix), a
 	push	bc
 	push	de
 	ld	hl, #0x0064
@@ -1973,116 +1842,244 @@ _main::
 	call	__divsint
 	pop	af
 	pop	af
+	ld	-20 (ix), l
+	ld	-19 (ix), h
+	ld	hl, #0x0064
+	push	hl
+	ld	l, -16 (ix)
+	ld	h, -15 (ix)
+	push	hl
+;main.c:158: if (rot == 1){
+	call	__divsint
+	pop	af
+	pop	af
 	ld	-16 (ix), l
 	ld	-15 (ix), h
+	pop	de
+	pop	bc
+	ld	a, -10 (ix)
+	dec	a
+	or	a, -9 (ix)
+	jr	NZ,00127$
+;main.c:159: ama = (0-ry)/100 + ((rx)/100*mapX);
+	ld	l, -20 (ix)
+	ld	h, -19 (ix)
+	add	hl, hl
+	add	hl, hl
+	ld	a, l
+	add	a, -16 (ix)
+	ld	l, a
+	ld	a, h
+	adc	a, -15 (ix)
+	ld	h, a
+	jp	00128$
+00127$:
+;main.c:163: ama= (0-rx)/100 + ((0-ry)/100*mapX);
+	xor	a, a
+	sub	a, -6 (ix)
+	ld	-18 (ix), a
+	ld	a, #0x00
+	sbc	a, -5 (ix)
+	ld	-17 (ix), a
+	push	bc
+	push	de
+	ld	hl, #0x0064
+	push	hl
+	ld	l, -18 (ix)
+	ld	h, -17 (ix)
+	push	hl
+;main.c:160: }else if (rot == 2){
+	call	__divsint
+	pop	af
+	pop	af
+	ld	-18 (ix), l
+	ld	-17 (ix), h
+	pop	de
+	pop	bc
+	ld	a, -10 (ix)
+	sub	a, #0x02
+	or	a, -9 (ix)
+	jr	NZ,00124$
+;main.c:163: ama= (0-rx)/100 + ((0-ry)/100*mapX);
+	ld	l, -16 (ix)
+	ld	h, -15 (ix)
+	add	hl, hl
+	add	hl, hl
+	ld	a, l
+	add	a, -18 (ix)
+	ld	l, a
+	ld	a, h
+	adc	a, -17 (ix)
+	ld	h, a
+	jr	00128$
+00124$:
+;main.c:168: ama= ry/100 + ((0-rx)/100*mapX);
+	push	bc
+	push	de
 	ld	hl, #0x0064
 	push	hl
 	ld	l, -4 (ix)
 	ld	h, -3 (ix)
 	push	hl
+;main.c:164: }else if (rot == 3){
 	call	__divsint
 	pop	af
 	pop	af
-	ld	-14 (ix), l
-	ld	-13 (ix), h
+	ld	-16 (ix), l
+	ld	-15 (ix), h
 	pop	de
 	pop	bc
-	push	de
-	ld	e, -14 (ix)
-	ld	d, -13 (ix)
-	ld	l, e
-	ld	h, d
+	ld	a, -10 (ix)
+	sub	a, #0x03
+	or	a, -9 (ix)
+	jr	NZ,00121$
+;main.c:168: ama= ry/100 + ((0-rx)/100*mapX);
+	ld	l, -18 (ix)
+	ld	h, -17 (ix)
 	add	hl, hl
-	add	hl, de
 	add	hl, hl
-	pop	de
-	ld	a, -16 (ix)
-	add	a, l
+	ld	a, l
+	add	a, -16 (ix)
 	ld	l, a
-	ld	a, -15 (ix)
-	adc	a, h
+	ld	a, h
+	adc	a, -15 (ix)
 	ld	h, a
-;main.c:142: if (ama > 0 && ama < mapX*mapY){
+	jr	00128$
+00121$:
+;main.c:170: ama= rx/100 + ((ry)/100*mapX);
+	ld	l, -16 (ix)
+	ld	h, -15 (ix)
+	add	hl, hl
+	add	hl, hl
+	ld	a, l
+	add	a, -20 (ix)
+	ld	l, a
+	ld	a, h
+	adc	a, -19 (ix)
+	ld	h, a
+00128$:
+;main.c:179: if (ama > 0 && ama < mapX*mapY){
 	xor	a, a
 	cp	a, l
 	sbc	a, h
-	jp	PO, 00253$
+	jp	PO, 00333$
 	xor	a, #0x80
-00253$:
-	jp	P, 00142$
+00333$:
+	jp	P, 00163$
 	ld	a, l
-	sub	a, #0x2a
+	sub	a, #0x30
 	ld	a, h
 	rla
 	ccf
 	rra
 	sbc	a, #0x80
-	jr	NC,00142$
-;main.c:143: if(map[ama] == 1){
-	ld	a, -26 (ix)
-	add	a, l
+	jp	NC, 00163$
+;main.c:180: if(map[ama] == 1){
+	ld	a, l
+	add	a, -36 (ix)
 	ld	l, a
-	ld	a, -25 (ix)
-	adc	a, h
+	ld	a, h
+	adc	a, -35 (ix)
 	ld	h, a
 	ld	a, (hl)
 	dec	a
-	jr	NZ,00142$
-;main.c:144: for (int d = 0; d < DMIR; ++d){
+	jp	NZ,00163$
+;main.c:182: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
 	ld	a, #0x40
-	sub	a, -19 (ix)
-	ld	-2 (ix), a
+	sub	a, -25 (ix)
+	ld	c, a
 	ld	a, #0x00
-	sbc	a, -18 (ix)
-	ld	-1 (ix), a
-	ld	bc, #0x0000
-00131$:
-	ld	a, c
-	sub	a, #0x01
-	ld	a, b
-	rla
-	ccf
-	rra
-	sbc	a, #0x80
-	jr	NC,00138$
-;main.c:145: line(i*DMIR+d, yy*YMULT, i*DMIR+d, YMAX-(yy*YMULT));
-	ld	l, -8 (ix)
-	ld	h, -7 (ix)
-	add	hl, bc
+	sbc	a, -24 (ix)
+	ld	b, a
+;main.c:181: if (oldY == 0){
+	ld	a, -32 (ix)
+	or	a, -33 (ix)
+	jr	NZ,00185$
+;main.c:182: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
 	push	bc
-	ld	e, -2 (ix)
-	ld	d, -1 (ix)
-	push	de
+	push	bc
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
 	push	hl
-	ld	e, -19 (ix)
-	ld	d, -18 (ix)
-	push	de
+	ld	l, -25 (ix)
+	ld	h, -24 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
 	push	hl
 	call	_line
 	ld	hl, #8
 	add	hl, sp
 	ld	sp, hl
 	pop	bc
-;main.c:144: for (int d = 0; d < DMIR; ++d){
+;main.c:184: for (int d = 0; d < DMIR; ++d){
+00185$:
+	ld	a, -22 (ix)
+	ld	-4 (ix), a
+	ld	a, -21 (ix)
+	ld	-3 (ix), a
+	ld	-2 (ix), c
+	ld	-1 (ix), b
+	ld	bc, #0x0000
+00152$:
+	ld	a, c
+	sub	a, #0x06
+	ld	a, b
+	rla
+	ccf
+	rra
+	sbc	a, #0x80
+	jr	NC,00137$
+;main.c:185: setpix(i*DMIR+d, yy*YMULT);
+	ld	a, -4 (ix)
+	add	a, c
+	ld	e, a
+	ld	a, -3 (ix)
+	adc	a, b
+	ld	d, a
+	push	bc
+	push	de
+	ld	l, -25 (ix)
+	ld	h, -24 (ix)
+	push	hl
+	push	de
+	call	_setpix
+	pop	af
+	pop	af
+	pop	de
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	push	hl
+	push	de
+	call	_setpix
+	pop	af
+	pop	af
+	pop	bc
+;main.c:188: toy = yy;
+	ld	a, -25 (ix)
+	ld	-27 (ix), a
+	ld	a, -24 (ix)
+	ld	-26 (ix), a
+;main.c:184: for (int d = 0; d < DMIR; ++d){
 	inc	bc
-	jr	00131$
-;main.c:150: ry-=rayDirX/2;
-00142$:
+	jr	00152$
+;main.c:194: ry-=rayDirX/2;
+00163$:
 	ld	a, -4 (ix)
 	add	a, #0xce
 	ld	-4 (ix), a
 	ld	a, -3 (ix)
 	adc	a, #0xff
 	ld	-3 (ix), a
-;main.c:151: rx+=rayDirY/2;
+;main.c:195: rx+=rayDirY/2;
 	ld	l, c
 	ld	h, b
-	ld	a, -17 (ix)
+	ld	a, -23 (ix)
 	or	a, a
-	jr	Z,00143$
+	jr	Z,00164$
 	ld	l, e
 	ld	h, d
-00143$:
+00164$:
 	sra	h
 	rr	l
 	ld	a, l
@@ -2091,30 +2088,188 @@ _main::
 	ld	a, h
 	adc	a, -5 (ix)
 	ld	-5 (ix), a
-;main.c:134: for (int yy = 0; yy < 32; ++yy){
+;main.c:152: for (int yy = 0; yy < 64; ++yy){
 	inc	-2 (ix)
-	jr	NZ,00256$
+	jr	NZ,00336$
 	inc	-1 (ix)
-00256$:
+00336$:
 	ld	a, -2 (ix)
-	ld	-19 (ix), a
+	ld	-25 (ix), a
 	ld	a, -1 (ix)
-	ld	-18 (ix), a
-	jp	00134$
-00138$:
-;main.c:125: for (int i = 0; i < v; ++i){
+	ld	-24 (ix), a
+	jp	00155$
+00137$:
+;main.c:202: if (toy  != oldY && toy != 0 && oldY != 0){
+	ld	a, -27 (ix)
+	sub	a, -33 (ix)
+	jr	NZ,00337$
+	ld	a, -26 (ix)
+	sub	a, -32 (ix)
+	jp	Z,00139$
+00337$:
+	ld	a, -26 (ix)
+	or	a, -27 (ix)
+	jp	Z, 00139$
+	ld	a, -32 (ix)
+	or	a, -33 (ix)
+	jp	Z, 00139$
+;main.c:203: line((i)*DMIR, (min(oldY, toy)+1)*YMULT, (i)*DMIR, (max(oldY, toy)-1)*YMULT);
+	ld	l, -27 (ix)
+	ld	h, -26 (ix)
+	push	hl
+	ld	l, -33 (ix)
+	ld	h, -32 (ix)
+	push	hl
+	call	_max
+	pop	af
+	pop	af
+	ex	de,hl
+	dec	de
+	push	de
+	ld	l, -27 (ix)
+	ld	h, -26 (ix)
+	push	hl
+	ld	l, -33 (ix)
+	ld	h, -32 (ix)
+	push	hl
+	call	_min
+	pop	af
+	pop	af
+	ld	c, l
+	ld	b, h
+	pop	de
+	inc	bc
+	push	de
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	push	bc
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	call	_line
+	ld	hl, #8
+	add	hl, sp
+	ld	sp, hl
+;main.c:204: line((i)*DMIR, YMAX-(min(oldY, toy)+1)*YMULT, (i)*DMIR, YMAX-(max(oldY, toy)-1)*YMULT);
+	ld	l, -27 (ix)
+	ld	h, -26 (ix)
+	push	hl
+	ld	l, -33 (ix)
+	ld	h, -32 (ix)
+	push	hl
+	call	_max
+	pop	af
+	pop	af
+	ld	-4 (ix), l
+	ld	-3 (ix), h
+	ld	a, -4 (ix)
+	add	a, #0xff
+	ld	-2 (ix), a
+	ld	a, -3 (ix)
+	adc	a, #0xff
+	ld	-1 (ix), a
+	ld	a, #0x40
+	sub	a, -2 (ix)
+	ld	-6 (ix), a
+	ld	a, #0x00
+	sbc	a, -1 (ix)
+	ld	-5 (ix), a
+	ld	l, -27 (ix)
+	ld	h, -26 (ix)
+	push	hl
+	ld	l, -33 (ix)
+	ld	h, -32 (ix)
+	push	hl
+	call	_min
+	pop	af
+	pop	af
+	ld	-2 (ix), l
+	ld	-1 (ix), h
+	ld	a, -2 (ix)
+	add	a, #0x01
+	ld	-4 (ix), a
+	ld	a, -1 (ix)
+	adc	a, #0x00
+	ld	-3 (ix), a
+	ld	a, #0x40
+	sub	a, -4 (ix)
+	ld	-2 (ix), a
+	ld	a, #0x00
+	sbc	a, -3 (ix)
+	ld	-1 (ix), a
+	ld	l, -6 (ix)
+	ld	h, -5 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	call	_line
+	ld	hl, #8
+	add	hl, sp
+	ld	sp, hl
+00139$:
+;main.c:206: if (oldY != 0 && toy ==0){
+	ld	a, -32 (ix)
+	or	a, -33 (ix)
+	jr	Z,00143$
+	ld	a, -26 (ix)
+	or	a, -27 (ix)
+	jr	NZ,00143$
+;main.c:207: line((i)*DMIR, (oldY+1)*YMULT, (i)*DMIR, YMAX-((oldY+1)*YMULT));
+	ld	a, -33 (ix)
+	add	a, #0x01
+	ld	-2 (ix), a
+	ld	a, -32 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	a, #0x40
+	sub	a, -2 (ix)
+	ld	-4 (ix), a
+	ld	a, #0x00
+	sbc	a, -1 (ix)
+	ld	-3 (ix), a
+	ld	l, -4 (ix)
+	ld	h, -3 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	call	_line
+	ld	hl, #8
+	add	hl, sp
+	ld	sp, hl
+00143$:
+;main.c:209: oldY=toy;
+	ld	a, -27 (ix)
+	ld	-33 (ix), a
+	ld	a, -26 (ix)
+	ld	-32 (ix), a
+;main.c:143: for (int i = 0; i < v; ++i){
 	inc	-8 (ix)
-	jp	NZ,00137$
+	jp	NZ,00158$
 	inc	-7 (ix)
-	jp	00137$
-00124$:
-;main.c:160: swap();
+	jp	00158$
+00145$:
+;main.c:212: swap();
 	call	_swap
-	jp	00128$
-00129$:
-;main.c:191: getKey();
+	jp	00149$
+00150$:
+;main.c:243: getKey();
 	call	_getKey
-;main.c:195: }
+;main.c:247: }
 	ld	sp, ix
 	pop	ix
 	ret

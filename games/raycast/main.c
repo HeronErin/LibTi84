@@ -2,10 +2,11 @@
 
 #include <stdbool.h>
 
-#define USE_SQRT
+// #define USE_SQRT
 
 #define RENDER_NUMS
 #define USE_LINE
+#define MIN_MAX
 
 #include "../../src/setting.h"
 #include "../../src/libti.c"
@@ -29,8 +30,8 @@
 
 #define MOVE_SPEED     2
 
-#define mapX 6
-#define mapY 7
+#define mapX 4
+#define mapY 12
 
 
 
@@ -45,23 +46,36 @@
 unsigned int Vtrack;
 
 
-#define DMIR 1
+#define DMIR 6
 #define YMULT 1
 void main() {
-    int px = 3;
-    int py = 8;
+    int px = 2;
+    int py = 13;
     int rot = 0;
 
+    // char map[] = {
+    //     1, 1, 1, 0, 1, 1,
+    //     1, 0, 1, 0, 0, 1,
+    //     1, 0, 1, 0, 0, 1, 
+    //     1, 0, 0, 0, 0, 1,
+    //     1, 0, 0, 0, 0, 1,
+    //     1, 0, 0, 0, 0, 1,
+    //     1, 0, 0, 0, 0, 1
+    // };
     char map[] = {
-        1, 1, 1, 0, 1, 1,
-        1, 0, 1, 0, 0, 1,
-        1, 0, 1, 0, 0, 1, 
-        1, 0, 0, 0, 0, 1,
-        1, 0, 0, 0, 0, 1,
-        1, 0, 0, 0, 0, 1,
-        1, 0, 0, 0, 0, 1
+        1, 1, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0
     };
-
 
 
 
@@ -111,6 +125,9 @@ void main() {
             else if (key == 3){ // right
                 px+=1;
             }
+            else if (key == 0x0A){ // plus
+                rot+=1;
+            }
             update=true;
 
         }
@@ -122,6 +139,7 @@ void main() {
             badclr();
             int v = XMAX/DMIR;
             int m;
+            int oldY = 0;
             for (int i = 0; i < v; ++i){
                 int cameraX = 2 * i*100 / v - 100;
                 int rx = ((px*100))+50;
@@ -130,9 +148,28 @@ void main() {
 
                 int rayDirX = 100;
                 int rayDirY = cameraX/2;
+                int toy = 0;
+                for (int yy = 0; yy < 64; ++yy){
+                    int orx = rx; int ory = ry; 
 
-                for (int yy = 0; yy < 32; ++yy){
-                    int orx = rx; int ory = ry; int ama = rx/100 + ((ry)/100*mapX);
+
+                        int ama;
+                        rot%=4;
+                        if (rot == 1){
+                            ama = (0-ry)/100 + ((rx)/100*mapX);
+                        }else if (rot == 2){
+                            // *x = 0-(*x);
+                            // *y = 0-(*y);
+                             ama= (0-rx)/100 + ((0-ry)/100*mapX);
+                        }else if (rot == 3){
+                            // int temp = *x;
+                            // *x = *y;
+                            // *y = 0-temp;
+                            ama= ry/100 + ((0-rx)/100*mapX);
+                        }else{
+                            ama= rx/100 + ((ry)/100*mapX);
+                        }
+
                         // number(ama);
                         // printc('-');
                         // number(rx);
@@ -141,8 +178,15 @@ void main() {
                         // newline();
                         if (ama > 0 && ama < mapX*mapY){
                             if(map[ama] == 1){
+                                if (oldY == 0){
+                                        line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
+                                    }
                                 for (int d = 0; d < DMIR; ++d){
-                                    line(i*DMIR+d, yy*YMULT, i*DMIR+d, YMAX-(yy*YMULT));
+                                    setpix(i*DMIR+d, yy*YMULT);
+                                    setpix(i*DMIR+d, YMAX-(yy*YMULT));
+                                    
+                                    toy = yy;
+                                    
                                 }
                                 break;
                             }
@@ -155,6 +199,14 @@ void main() {
                            
 
                 }
+                if (toy  != oldY && toy != 0 && oldY != 0){
+                    line((i)*DMIR, (min(oldY, toy)+1)*YMULT, (i)*DMIR, (max(oldY, toy)-1)*YMULT);
+                    line((i)*DMIR, YMAX-(min(oldY, toy)+1)*YMULT, (i)*DMIR, YMAX-(max(oldY, toy)-1)*YMULT);
+                }
+                if (oldY != 0 && toy ==0){
+                    line((i)*DMIR, (oldY+1)*YMULT, (i)*DMIR, YMAX-((oldY+1)*YMULT));
+                }
+                oldY=toy;
                 
             }
             swap();
