@@ -13,7 +13,7 @@ If you want to play my horrible tetris clone you can download it [here](https://
 Required preprocesser settings
 -----------
 
-To save storage space use #define to tell what function you wish to use. Include the setting.h for automatic defining dependancies required by over moduels. And remember to #define before all the includes.
+To save storage space use #define to tell what function you wish to use. Include the setting.h for automatic defining dependancies required by other moduels. And remember to #define before all the includes.
 
 I'm not going to state them all here so look at the src for all the functions avalible. 
 
