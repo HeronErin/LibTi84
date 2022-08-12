@@ -1,5 +1,62 @@
 #pragma once
 
+#ifdef USE_SQRT
+// int isqrt(int numb )
+// {
+//     int root = 0, bit = 0x04000;
+//     while ( bit != 0 )
+//     {
+//         if ( numb >= root + bit )
+//         {
+//             numb = numb - root - bit;
+//             root = root / 2 + bit;
+//         }
+//         else
+//             root = root / 2;
+//         bit = bit / 4;
+//     }
+//     return root;
+// }
+unsigned long isqrt(unsigned int x){
+    for (unsigned long i = 0; i < x; i+=10){
+        
+        unsigned long b = (i/10)*(i/10);
+        
+        if (b == x)
+            return i;
+        
+        if (b > x){
+            // printf("%lu\n", b);            
+            unsigned long c = (i-10);
+            
+            // return x2;
+ 
+   
+
+            for (unsigned int per = 1; per < 10; ++per){
+                
+                unsigned long d = c+(per*10*100);
+               
+                
+
+                d=d*d/10000;
+
+                if (d > x){
+                    c += ((per-1)*10*100);
+                    // printf("%d\n", c);
+                    break;
+                }
+            }
+
+            
+            return c/10;
+        }
+    }
+}
+#endif
+
+
+
 #define slong signed long
 #ifdef USE_DEG_2_RAD
 slong deg2rad(slong r){
