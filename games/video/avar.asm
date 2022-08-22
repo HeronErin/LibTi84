@@ -862,54 +862,183 @@ _main::
 	call	_init_graphics
 ;appVar.c:70: clearscreen();
 	call	_clearscreen
-;appVar.c:72: char* pos = (char*) getInfo("\x15OWO\0");
-	ld	hl, #___str_0
-	push	hl
-	call	_getInfo
-	pop	af
+;appVar.c:78: int b = getKey()-0x8E;
+	call	_getKey
 	ld	c, l
 	ld	b, h
-	ld	e, c
-;appVar.c:73: if (pos != 0){
-	ld	a,b
-	ld	d,a
-	or	a, c
-	jp	Z,_getKey
-;appVar.c:74: for (int i = 0; i <10; i++){
-	ld	bc, #0x0000
-00105$:
 	ld	a, c
-	sub	a, #0x0a
+	add	a, #0x72
+	ld	c, a
 	ld	a, b
-	rla
-	ccf
-	rra
-	sbc	a, #0x80
-	jp	NC,_getKey
-;appVar.c:75: printc(pos[i+2]);
-	ld	l, c
-	ld	h, b
-	inc	hl
-	inc	hl
-	add	hl, de
-	ld	a, (hl)
-	push	bc
-	push	de
-	push	af
-	inc	sp
-	call	_printc
-	inc	sp
-	pop	de
-	pop	bc
-;appVar.c:74: for (int i = 0; i <10; i++){
-	inc	bc
-	jr	00105$
-;appVar.c:107: getKey();
-;appVar.c:109: }
+	adc	a, #0xff
+;appVar.c:79: if (b==0){
+	ld	b, a
+	or	a, c
+	jr	NZ,00128$
+;appVar.c:80: archiveToggle("\x15TCK00\0");
+	ld	hl, #___str_0
+	push	hl
+	call	_archiveToggle
+	pop	af
+	jp	_getKey
+00128$:
+;appVar.c:82: else if (b==1){
+	ld	a, c
+	dec	a
+	or	a, b
+	jr	NZ,00125$
+;appVar.c:83: archiveToggle("\x15TCK01\0");
+	ld	hl, #___str_1
+	push	hl
+	call	_archiveToggle
+	pop	af
+	jp	_getKey
+00125$:
+;appVar.c:85: else if (b==2){
+	ld	a, c
+	sub	a, #0x02
+	or	a, b
+	jr	NZ,00122$
+;appVar.c:86: archiveToggle("\x15TCK02\0");
+	ld	hl, #___str_2
+	push	hl
+	call	_archiveToggle
+	pop	af
+	jp	_getKey
+00122$:
+;appVar.c:88: else if (b==3){
+	ld	a, c
+	sub	a, #0x03
+	or	a, b
+	jr	NZ,00119$
+;appVar.c:89: archiveToggle("\x15TCK03\0");
+	ld	hl, #___str_3
+	push	hl
+	call	_archiveToggle
+	pop	af
+	jp	_getKey
+00119$:
+;appVar.c:91: else if (b==4){
+	ld	a, c
+	sub	a, #0x04
+	or	a, b
+	jr	NZ,00116$
+;appVar.c:92: archiveToggle("\x15TCK04\0");
+	ld	hl, #___str_4
+	push	hl
+	call	_archiveToggle
+	pop	af
+	jp	_getKey
+00116$:
+;appVar.c:94: else if (b==5){
+	ld	a, c
+	sub	a, #0x05
+	or	a, b
+	jr	NZ,00113$
+;appVar.c:95: archiveToggle("\x15TCK05\0");
+	ld	hl, #___str_5
+	push	hl
+	call	_archiveToggle
+	pop	af
+	jp	_getKey
+00113$:
+;appVar.c:97: else if (b==6){
+	ld	a, c
+	sub	a, #0x06
+	or	a, b
+	jr	NZ,00110$
+;appVar.c:98: archiveToggle("\x15TCK06\0");
+	ld	hl, #___str_6
+	push	hl
+	call	_archiveToggle
+	pop	af
+	jp	_getKey
+00110$:
+;appVar.c:100: else if (b==7){
+	ld	a, c
+	sub	a, #0x07
+	or	a, b
+	jr	NZ,00107$
+;appVar.c:101: archiveToggle("\x15TCK07\0");
+	ld	hl, #___str_7
+	push	hl
+	call	_archiveToggle
+	pop	af
+	jp	_getKey
+00107$:
+;appVar.c:103: else if (b==8){
+	ld	a, c
+	sub	a, #0x08
+	or	a, b
+	jr	NZ,00104$
+;appVar.c:104: archiveToggle("\x15TCK08\0");
+	ld	hl, #___str_8
+	push	hl
+	call	_archiveToggle
+	pop	af
+	jp	_getKey
+00104$:
+;appVar.c:106: else if (b==9){
+	ld	a, c
+	sub	a, #0x09
+	or	a, b
+	jp	NZ,_getKey
+;appVar.c:107: archiveToggle("\x15TCK09\0");
+	ld	hl, #___str_9
+	push	hl
+	call	_archiveToggle
+	pop	af
+;appVar.c:146: getKey();
+;appVar.c:148: }
 	jp	_getKey
 ___str_0:
 	.db 0x15
-	.ascii "OWO"
+	.ascii "TCK00"
+	.db 0x00
+	.db 0x00
+___str_1:
+	.db 0x15
+	.ascii "TCK01"
+	.db 0x00
+	.db 0x00
+___str_2:
+	.db 0x15
+	.ascii "TCK02"
+	.db 0x00
+	.db 0x00
+___str_3:
+	.db 0x15
+	.ascii "TCK03"
+	.db 0x00
+	.db 0x00
+___str_4:
+	.db 0x15
+	.ascii "TCK04"
+	.db 0x00
+	.db 0x00
+___str_5:
+	.db 0x15
+	.ascii "TCK05"
+	.db 0x00
+	.db 0x00
+___str_6:
+	.db 0x15
+	.ascii "TCK06"
+	.db 0x00
+	.db 0x00
+___str_7:
+	.db 0x15
+	.ascii "TCK07"
+	.db 0x00
+	.db 0x00
+___str_8:
+	.db 0x15
+	.ascii "TCK08"
+	.db 0x00
+	.db 0x00
+___str_9:
+	.db 0x15
+	.ascii "TCK09"
 	.db 0x00
 	.db 0x00
 	.area _CODE

@@ -68,13 +68,52 @@ void main() {
     init_graphics();
 
     clearscreen();
-    // archiveToggle("\x15OWO\0");
-    char* pos = (char*) getInfo("\x15OWO\0");
-    if (pos != 0){
-	    for (int i = 0; i <10; i++){
-	    	printc(pos[i+2]);
-	    }
+	// int k = getKey()-0x8E;
+	// if (k < 0){
+		// k = 1;
+	// }else if (k > 10){
+		// k = 1;
+	// }
+	
+	int b = getKey()-0x8E;
+	if (b==0){
+		archiveToggle("\x15TCK00\0");
 	}
+	else if (b==1){
+		archiveToggle("\x15TCK01\0");
+	}
+	else if (b==2){
+		archiveToggle("\x15TCK02\0");
+	}
+	else if (b==3){
+		archiveToggle("\x15TCK03\0");
+	}
+	else if (b==4){
+		archiveToggle("\x15TCK04\0");
+	}
+	else if (b==5){
+		archiveToggle("\x15TCK05\0");
+	}
+	else if (b==6){
+		archiveToggle("\x15TCK06\0");
+	}
+	else if (b==7){
+		archiveToggle("\x15TCK07\0");
+	}
+	else if (b==8){
+		archiveToggle("\x15TCK08\0");
+	}
+	else if (b==9){
+		archiveToggle("\x15TCK09\0");
+	}
+
+    // archiveToggle("\x15OWO\0");
+ //    char* pos = (char*) getInfo("\x15OWO\0");
+ //    if (pos != 0){
+	//     for (int i = 0; i <10; i++){
+	//     	printc(pos[i+2]);
+	//     }
+	// }
     // unsigned int dddd = make(200, "\x15MAIN\0")+2;
 
     // unsigned int dddd = 0xE0AB;
