@@ -176,6 +176,7 @@ void main() {
                         // printc('-');
                         // number(ry);
                         // newline();
+                    
                         if (ama > 0 && ama < mapX*mapY){
                             if(map[ama] == 1){
                                 if (oldY == 0){
@@ -191,6 +192,7 @@ void main() {
                                 break;
                             }
                         }
+                        
                         ry-=rayDirX/2;
                         rx+=rayDirY/2;
 

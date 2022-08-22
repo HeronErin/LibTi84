@@ -1577,7 +1577,7 @@ _main::
 ;main.c:106: bool update = true;
 	ld	-34 (ix), #0x01
 ;main.c:107: while (true){
-00149$:
+00151$:
 ;main.c:109: int key = getKeyId();
 	call	_getKeyId
 	ld	-2 (ix), l
@@ -1590,7 +1590,7 @@ _main::
 	ld	a, -2 (ix)
 	sub	a, #0x0f
 	or	a, -1 (ix)
-	jp	Z,00150$
+	jp	Z,00152$
 ;main.c:114: else if (key == 1){ // down
 	ld	a, -2 (ix)
 	dec	a
@@ -1646,16 +1646,16 @@ _main::
 	jr	NZ,00117$
 ;main.c:129: rot+=1;
 	inc	-10 (ix)
-	jr	NZ,00326$
+	jr	NZ,00333$
 	inc	-9 (ix)
-00326$:
+00333$:
 00117$:
 ;main.c:131: update=true;
 	ld	-34 (ix), #0x01
 00119$:
 ;main.c:137: if (update){
 	bit	0, -34 (ix)
-	jp	Z, 00149$
+	jp	Z, 00151$
 ;main.c:138: update=false;
 	xor	a, a
 	ld	-34 (ix), a
@@ -1701,7 +1701,7 @@ _main::
 	xor	a, a
 	ld	-8 (ix), a
 	ld	-7 (ix), a
-00158$:
+00160$:
 	ld	a, -8 (ix)
 	sub	a, #0x10
 	ld	a, -7 (ix)
@@ -1709,7 +1709,7 @@ _main::
 	ccf
 	rra
 	sbc	a, #0x80
-	jp	NC, 00145$
+	jp	NC, 00147$
 ;main.c:144: int cameraX = 2 * i*100 / v - 100;
 	ld	c, -8 (ix)
 	ld	b, -7 (ix)
@@ -1754,14 +1754,14 @@ _main::
 	ld	a, -15 (ix)
 	ld	-3 (ix), a
 	bit	7, -15 (ix)
-	jr	Z,00162$
+	jr	Z,00164$
 	ld	a, -16 (ix)
 	add	a, #0x01
 	ld	-4 (ix), a
 	ld	a, -15 (ix)
 	adc	a, #0x00
 	ld	-3 (ix), a
-00162$:
+00164$:
 	ld	c, -4 (ix)
 	ld	b, -3 (ix)
 	sra	b
@@ -1788,8 +1788,8 @@ _main::
 	xor	a, a
 	ld	-2 (ix), a
 	ld	-1 (ix), a
-00155$:
-;main.c:182: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
+00157$:
+;main.c:183: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
 	push	de
 	ld	e, -8 (ix)
 	ld	d, -7 (ix)
@@ -1809,7 +1809,7 @@ _main::
 	ccf
 	rra
 	sbc	a, #0x80
-	jp	NC, 00137$
+	jp	NC, 00139$
 ;main.c:157: rot%=4;
 	push	bc
 	push	de
@@ -1958,14 +1958,36 @@ _main::
 	adc	a, -19 (ix)
 	ld	h, a
 00128$:
-;main.c:179: if (ama > 0 && ama < mapX*mapY){
+;main.c:179: if (rx > 0 & rx > mapX){
+	xor	a, a
+	cp	a, -6 (ix)
+	sbc	a, -5 (ix)
+	jp	PO, 00340$
+	xor	a, #0x80
+00340$:
+	rlca
+	and	a,#0x01
+	ld	-15 (ix), a
+	ld	a, #0x04
+	cp	a, -6 (ix)
+	ld	a, #0x00
+	sbc	a, -5 (ix)
+	jp	PO, 00341$
+	xor	a, #0x80
+00341$:
+	rlca
+	and	a,#0x01
+	and	a, -15 (ix)
+	or	a, a
+	jp	Z, 00165$
+;main.c:180: if (ama > 0 && ama < mapX*mapY){
 	xor	a, a
 	cp	a, l
 	sbc	a, h
-	jp	PO, 00333$
+	jp	PO, 00342$
 	xor	a, #0x80
-00333$:
-	jp	P, 00163$
+00342$:
+	jp	P, 00165$
 	ld	a, l
 	sub	a, #0x30
 	ld	a, h
@@ -1973,8 +1995,8 @@ _main::
 	ccf
 	rra
 	sbc	a, #0x80
-	jp	NC, 00163$
-;main.c:180: if(map[ama] == 1){
+	jp	NC, 00165$
+;main.c:181: if(map[ama] == 1){
 	ld	a, l
 	add	a, -36 (ix)
 	ld	l, a
@@ -1983,19 +2005,19 @@ _main::
 	ld	h, a
 	ld	a, (hl)
 	dec	a
-	jp	NZ,00163$
-;main.c:182: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
+	jp	NZ,00165$
+;main.c:183: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
 	ld	a, #0x40
 	sub	a, -25 (ix)
 	ld	c, a
 	ld	a, #0x00
 	sbc	a, -24 (ix)
 	ld	b, a
-;main.c:181: if (oldY == 0){
+;main.c:182: if (oldY == 0){
 	ld	a, -32 (ix)
 	or	a, -33 (ix)
-	jr	NZ,00185$
-;main.c:182: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
+	jr	NZ,00188$
+;main.c:183: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
 	push	bc
 	push	bc
 	ld	l, -22 (ix)
@@ -2012,8 +2034,8 @@ _main::
 	add	hl, sp
 	ld	sp, hl
 	pop	bc
-;main.c:184: for (int d = 0; d < DMIR; ++d){
-00185$:
+;main.c:185: for (int d = 0; d < DMIR; ++d){
+00188$:
 	ld	a, -22 (ix)
 	ld	-4 (ix), a
 	ld	a, -21 (ix)
@@ -2021,7 +2043,7 @@ _main::
 	ld	-2 (ix), c
 	ld	-1 (ix), b
 	ld	bc, #0x0000
-00152$:
+00154$:
 	ld	a, c
 	sub	a, #0x06
 	ld	a, b
@@ -2029,8 +2051,8 @@ _main::
 	ccf
 	rra
 	sbc	a, #0x80
-	jr	NC,00137$
-;main.c:185: setpix(i*DMIR+d, yy*YMULT);
+	jr	NC,00139$
+;main.c:186: setpix(i*DMIR+d, yy*YMULT);
 	ld	a, -4 (ix)
 	add	a, c
 	ld	e, a
@@ -2055,31 +2077,31 @@ _main::
 	pop	af
 	pop	af
 	pop	bc
-;main.c:188: toy = yy;
+;main.c:189: toy = yy;
 	ld	a, -25 (ix)
 	ld	-27 (ix), a
 	ld	a, -24 (ix)
 	ld	-26 (ix), a
-;main.c:184: for (int d = 0; d < DMIR; ++d){
+;main.c:185: for (int d = 0; d < DMIR; ++d){
 	inc	bc
-	jr	00152$
-;main.c:194: ry-=rayDirX/2;
-00163$:
+	jr	00154$
+;main.c:196: ry-=rayDirX/2;
+00165$:
 	ld	a, -4 (ix)
 	add	a, #0xce
 	ld	-4 (ix), a
 	ld	a, -3 (ix)
 	adc	a, #0xff
 	ld	-3 (ix), a
-;main.c:195: rx+=rayDirY/2;
+;main.c:197: rx+=rayDirY/2;
 	ld	l, c
 	ld	h, b
 	ld	a, -23 (ix)
 	or	a, a
-	jr	Z,00164$
+	jr	Z,00166$
 	ld	l, e
 	ld	h, d
-00164$:
+00166$:
 	sra	h
 	rr	l
 	ld	a, l
@@ -2090,30 +2112,30 @@ _main::
 	ld	-5 (ix), a
 ;main.c:152: for (int yy = 0; yy < 64; ++yy){
 	inc	-2 (ix)
-	jr	NZ,00336$
+	jr	NZ,00345$
 	inc	-1 (ix)
-00336$:
+00345$:
 	ld	a, -2 (ix)
 	ld	-25 (ix), a
 	ld	a, -1 (ix)
 	ld	-24 (ix), a
-	jp	00155$
-00137$:
-;main.c:202: if (toy  != oldY && toy != 0 && oldY != 0){
+	jp	00157$
+00139$:
+;main.c:204: if (toy  != oldY && toy != 0 && oldY != 0){
 	ld	a, -27 (ix)
 	sub	a, -33 (ix)
-	jr	NZ,00337$
+	jr	NZ,00346$
 	ld	a, -26 (ix)
 	sub	a, -32 (ix)
-	jp	Z,00139$
-00337$:
+	jp	Z,00141$
+00346$:
 	ld	a, -26 (ix)
 	or	a, -27 (ix)
-	jp	Z, 00139$
+	jp	Z, 00141$
 	ld	a, -32 (ix)
 	or	a, -33 (ix)
-	jp	Z, 00139$
-;main.c:203: line((i)*DMIR, (min(oldY, toy)+1)*YMULT, (i)*DMIR, (max(oldY, toy)-1)*YMULT);
+	jp	Z, 00141$
+;main.c:205: line((i)*DMIR, (min(oldY, toy)+1)*YMULT, (i)*DMIR, (max(oldY, toy)-1)*YMULT);
 	ld	l, -27 (ix)
 	ld	h, -26 (ix)
 	push	hl
@@ -2151,7 +2173,7 @@ _main::
 	ld	hl, #8
 	add	hl, sp
 	ld	sp, hl
-;main.c:204: line((i)*DMIR, YMAX-(min(oldY, toy)+1)*YMULT, (i)*DMIR, YMAX-(max(oldY, toy)-1)*YMULT);
+;main.c:206: line((i)*DMIR, YMAX-(min(oldY, toy)+1)*YMULT, (i)*DMIR, YMAX-(max(oldY, toy)-1)*YMULT);
 	ld	l, -27 (ix)
 	ld	h, -26 (ix)
 	push	hl
@@ -2214,15 +2236,15 @@ _main::
 	ld	hl, #8
 	add	hl, sp
 	ld	sp, hl
-00139$:
-;main.c:206: if (oldY != 0 && toy ==0){
+00141$:
+;main.c:208: if (oldY != 0 && toy ==0){
 	ld	a, -32 (ix)
 	or	a, -33 (ix)
-	jr	Z,00143$
+	jr	Z,00145$
 	ld	a, -26 (ix)
 	or	a, -27 (ix)
-	jr	NZ,00143$
-;main.c:207: line((i)*DMIR, (oldY+1)*YMULT, (i)*DMIR, YMAX-((oldY+1)*YMULT));
+	jr	NZ,00145$
+;main.c:209: line((i)*DMIR, (oldY+1)*YMULT, (i)*DMIR, YMAX-((oldY+1)*YMULT));
 	ld	a, -33 (ix)
 	add	a, #0x01
 	ld	-2 (ix), a
@@ -2251,25 +2273,25 @@ _main::
 	ld	hl, #8
 	add	hl, sp
 	ld	sp, hl
-00143$:
-;main.c:209: oldY=toy;
+00145$:
+;main.c:211: oldY=toy;
 	ld	a, -27 (ix)
 	ld	-33 (ix), a
 	ld	a, -26 (ix)
 	ld	-32 (ix), a
 ;main.c:143: for (int i = 0; i < v; ++i){
 	inc	-8 (ix)
-	jp	NZ,00158$
+	jp	NZ,00160$
 	inc	-7 (ix)
-	jp	00158$
-00145$:
-;main.c:212: swap();
+	jp	00160$
+00147$:
+;main.c:214: swap();
 	call	_swap
-	jp	00149$
-00150$:
-;main.c:243: getKey();
+	jp	00151$
+00152$:
+;main.c:245: getKey();
 	call	_getKey
-;main.c:247: }
+;main.c:249: }
 	ld	sp, ix
 	pop	ix
 	ret
