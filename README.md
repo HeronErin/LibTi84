@@ -32,8 +32,6 @@ In case you happen to want to make it work, here's some tips:
 
 
 
-_I am not the origin of this tool, I stole the base of this from the original [LibTi](https://github.com/azertyfun/LibTI)_
-
 
 Some useful resource
 ------------
@@ -41,3 +39,11 @@ Some useful resource
 * [wikiti for almost all bcalls and ram addresses](https://wikiti.brandonw.net/index.php?title=Calculator_Documentation)
 * [Hub of ti dev community](https://www.cemetech.net/tools/ti84p)
 * [The original LibTi I build from.](https://github.com/azertyfun/LibTI)
+
+
+
+
+
+
+
+_I am not the origin of this tool, I stole the base of this from the original [LibTi](https://github.com/azertyfun/LibTI)_
