@@ -1,0 +1,8 @@
+upload each file in vars/ to calc
+  before uploading the next file use the avar to archive the file you just uploaded, press 0 for first file and so on
+ 
+ make sure all the vars are uploaded and archived
+ 
+ then run the video program
+ 
+ running on emulator is reccommended. 
