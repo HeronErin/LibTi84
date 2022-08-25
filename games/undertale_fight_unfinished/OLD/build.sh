@@ -1,8 +1,6 @@
 export MAINC="main.c"
 export OUT_NAME="underfight"
 
-python3 ../../asset_packer.py imgs.c data.8xV datatale
-
 
 sdasz80 -p -g -o tios_crt0.rel tios_crt0.s
 sdcc -Ilibti --no-std-crt0 --code-loc 40347 --data-loc 0 --std-sdcc99 -mz80 --reserve-regs-iy -o $OUT_NAME.ihx tios_crt0.rel $MAINC

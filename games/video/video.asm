@@ -1549,13 +1549,8 @@ _main::
 	adc	a, -3 (ix)
 	inc	hl
 	ld	(hl), a
-;main.c:139: wait128(5);
+;main.c:140: if (getKeyId() == 15)
 	push	bc
-	ld	a, #0x05
-	push	af
-	inc	sp
-	call	_wait128
-	inc	sp
 	call	_getKeyId
 	ex	de,hl
 	pop	bc

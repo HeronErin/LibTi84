@@ -1,4 +1,12 @@
 
+#ifdef USE_GET_INFO
+#define USE_NULLCP
+#endif
+#ifdef USE_ARCHIVE
+#define USE_NULLCP
+#endif
+
+
 #ifdef TANS_PRE
 #define USE_ABS_INT
 #endif

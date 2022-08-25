@@ -1,0 +1,4 @@
+#define HEART_WIDTH_OFF 0
+#define HEART_HEIGHT_OFF 4
+#define HEART_LENGTH_OFF 8
+

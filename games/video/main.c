@@ -136,7 +136,7 @@ void main() {
 		        Vtrack = VARBIN;
 		        swap();
 		        boff += lind(curr);
-		        wait128(5);
+		        // wait128(5);
 		        if (getKeyId() == 15)
 		        	return;
 		        // break;

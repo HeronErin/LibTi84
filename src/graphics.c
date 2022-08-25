@@ -216,6 +216,37 @@ int randomInt(){
 
 #endif
 
+
+#ifdef USE_DRAW_BITMAP 
+#define IS_BIT_SET_BM(value, pos) (value & (1U<< pos))
+void drawBitmap(int x, int y, int width, int height, char* img){
+    for (int py =0; py<height; py++){
+        for (int px = 0; px<width; px++){
+            if((py+y)<YMAX){
+                char pixbyte = img[px+(py*width)];
+                int tempY = ((py+y)*12);
+                if (x%8==0){
+                    int pxb = px+(x/8);
+                    if (pxb<12)
+                        buff[tempY+pxb] = pixbyte;
+                }else{  
+                    for (char bp = 0; bp < 8; bp++){
+
+                        if (IS_BIT_SET_BM(pixbyte, (7-bp))){
+                            int rx = bp+x+(px*8);
+                            if (rx<XMAX)
+                                buff[(rx/8) + tempY] |= 1<<(7-(rx%8));
+                        }
+                    }
+                }
+
+            }
+
+        }
+    }
+}
+#endif
+
 // void getTime(){
 //     for (int i =0; i < 2; i++){ 
 //         __asm
