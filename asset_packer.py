@@ -44,9 +44,10 @@ class BitArr:
         v = int(self.arr, 2)
         b = bytearray()
         
-        while v:
+        for i in range((len(self.arr)//8) + (1 if len(self.arr)%8!=0 else 0 )):
             b.append(v & 0xff)
             v >>= 8
+
         return (struct.pack("B", (len(self.arr)%8)) if prep else b"")+bytes(b[::-1])
     def popBit(self):
         b = self.arr[0]
@@ -74,39 +75,47 @@ data = BitArr()
 
 dfile = open(decls, "w")
 
+offsets = []
+
 imgdata = BitArr()
 for inur in os.listdir(os.path.join(pwd, "imgs")):
 	im = Image.open(os.path.join(pwd, "imgs", inur)) 
 	
-	
-	imgdata2 = BitArr()
-	rl=0
-	full = []
-	for y in range(im.height):
-		i = 0
-		row = []
-		for x in range(im.width):
-			pixel = im.getpixel((x, y))
-			px = pixel != (255, 255,255)
-			# print(pix)
-			byt = i//8
-			if len(row)-1!=byt:
-				row.append(0)
-			if px:
-				row[byt] |= 1<<(7-(i%8))
-			i+=1
-		rl = len(row)
-		imgdata2.addBytes(bytes(row))
-	olen = len(imgdata.arr)
-	imgdata.addBytes(struct.pack(">iii", rl,im.height,len(imgdata2.arr)//8))
-	print()
-	dfile.write(f"#define {inur.split('.')[0]}_WIDTH_OFF {olen//8}\n")
-	dfile.write(f"#define {inur.split('.')[0]}_HEIGHT_OFF {olen//8+4}\n")
-	dfile.write(f"#define {inur.split('.')[0]}_LENGTH_OFF {olen//8+8}\n\n")
+	for iv in range(8):
+		imgdata2 = BitArr()
+		rl=0
+		full = []
+		for y in range(im.height):
+			i = iv
+			row = []
+			for x in range(im.width):
+				pixel = im.getpixel((x, y))
+				px = pixel != (255, 255,255)
+				# print(pix)
+				byt = i//8
+				if len(row)-1!=byt:
+					row.append(0)
+				if px:
+					row[byt] |= 1<<(7-(i%8))
+				i+=1
+			rl = len(row)
+			imgdata2.addBytes(bytes(row))
+		olen = len(imgdata.arr)
+		imgdata.addBytes(struct.pack("<II", rl, im.height))
+		
 
-	imgdata.addBytes(imgdata2.toBytes(False))
+
+		dfile.write(f"#define {inur.split('.')[0]}_{iv}_WIDTH_OFF {olen//8}\n")
+		dfile.write(f"#define {inur.split('.')[0]}_{iv}_HEIGHT_OFF {olen//8+4}\n")
+		dfile.write(f"#define {inur.split('.')[0]}_{iv}_IMG_OFF {olen//8+8}\n\n")
+		dfile.write(f"#define {inur.split('.')[0]}_{iv}_OFF_LOC {len(offsets)}\n\n")
+
+		offsets.append(str(olen//8))
+		imgdata.addBytes(imgdata2.toBytes(False))
 
 dfile.close()
+print("PUT THIS IN main.c :")
+print("int offsets[] = {", ", ".join(offsets), "};")
 f = open("/tmp/datatopack.dat.tmp", "wb")
 f.write(imgdata.toBytes(False))
 f.close()

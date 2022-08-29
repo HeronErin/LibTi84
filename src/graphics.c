@@ -167,10 +167,75 @@ void wait128(unsigned char x){ // Wait for amount of time (1/128th of sec)
 }
 #endif
 
+
 void swap(){
     bcall(0x486A);
-    // bcall(0x4092);
-    
+//     __asm
+// fastCopy:
+//      di
+//      ld a,(0x80)
+//      out (0x10),a
+//      ld hl,(0x9340-12-(-(12*64)+1))
+//      ld a, (0x20)
+//      ld c,a
+//      inc hl
+//      dec hl
+// fastCopyAgain:
+//      ld b, 64
+//      inc c
+//      ld de,(-(12*64)+1)
+//      out (0x10),a
+//      add hl,de
+//      ld de,(10)
+// fastCopyLoop:
+//      add hl,de
+//      inc hl
+//      inc hl
+//      inc de
+//      ld a,(hl)
+//      out (0x11),a
+//      dec de
+//      djnz fastCopyLoop
+//      ld a,c
+//      cp #0x2C
+//      jr nz,fastCopyAgain
+
+//             __endasm;
+//     __asm
+// SafeCopy:   
+//     di
+//     ld hl,(0x9340)
+//     ld c,#0x10
+//     ld a,#0x80
+// setrow:
+//     .db #0x0ED,#0x070
+//     jp m,setrow
+//     out (0x10),a
+//     ld de,(12)
+//     ld a,(0x20)
+// col:
+//     .db #0x0ED,#0x070
+//     jp m,col
+//     out (0x10),a
+//     push af
+//     ld b,#64
+// row:
+//     ld a,(hl)
+// rowwait:
+//     .db #0x0ED,#0x070
+//     jp m,rowwait
+//     out (0x11),a
+//     add hl,de
+//     djnz row
+//     pop af
+//     dec h
+//     dec h
+//     dec h
+//     inc hl
+//     inc a
+//     cp #0x2c
+//     jp nz,col
+//     __endasm;
 }
 
 int getKeyId(){
@@ -220,20 +285,24 @@ int randomInt(){
 #ifdef USE_DRAW_BITMAP 
 #define IS_BIT_SET_BM(value, pos) (value & (1U<< pos))
 void drawBitmap(int x, int y, int width, int height, char* img){
-    for (int py =0; py<height; py++){
-        for (int px = 0; px<width; px++){
+    int xremain = x%8;
+    int xdiv = x/8;
+    for (int py =0; py<height; ++py){
+        int pw = py*width;
+        for (int px = 0; px<width; ++px){
             if((py+y)<YMAX){
-                char pixbyte = img[px+(py*width)];
+                char pixbyte = img[px+( pw )];
                 int tempY = ((py+y)*12);
-                if (x%8==0){
-                    int pxb = px+(x/8);
+                if (xremain==0){
+                    int pxb = px+(xdiv);
                     if (pxb<12)
                         buff[tempY+pxb] = pixbyte;
                 }else{  
+                    int pxmult = px*8;
                     for (char bp = 0; bp < 8; bp++){
 
                         if (IS_BIT_SET_BM(pixbyte, (7-bp))){
-                            int rx = bp+x+(px*8);
+                            int rx = bp+x+(pxmult);
                             if (rx<XMAX)
                                 buff[(rx/8) + tempY] |= 1<<(7-(rx%8));
                         }
@@ -247,6 +316,34 @@ void drawBitmap(int x, int y, int width, int height, char* img){
 }
 #endif
 
+#ifdef USE_DRAW_BITMAP_STRIPED
+
+void drawBitmapStriped(int x, int y, int width, int height, char* img){
+    int addMax=0;
+    int xremain = x%8;
+    int xdiv = x/8;
+    for (int py =0; py<height; ++py){
+        int yadd = (py+y);
+        int tempY = (yadd*12);
+
+        int pw = py*width;
+        for (int px = 0; px<width; ++px){
+            if(yadd<YMAX){
+                char pixbyte = img[px+( pw )];
+                
+                int pxb = px+(xdiv);
+                if (pxb<12)
+                    buff[tempY+pxb] = pixbyte;
+
+            }
+            if (addMax > 700)
+                return;
+            ++addMax;
+
+        }
+    }
+}
+#endif
 // void getTime(){
 //     for (int i =0; i < 2; i++){ 
 //         __asm
