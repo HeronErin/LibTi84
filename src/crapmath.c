@@ -125,24 +125,68 @@ int absint(int x){
 }
 #endif
 
+#pragma disable_warning 59
+#pragma disable_warning 85
 #ifdef TANS_PRE
 short int tans[] = {0, 17, 36, 57, 83, 119, 173, 274, 567, 1000, -567, -274, -173, -119, -83, -57, -36, -17, 0, 17, 36, 57, 83, 119, 173, 274, 567, 1000, -567, -274, -173, -119, -83, -57, -36, -17};
+short int __tanBypass(int index){
+    __asm
+        ld  hl, #0 + 4
+        add hl, sp
+        ld  a, (hl)
+        inc hl
+        ld  h, (hl)
+        ld  l, a
+        add hl, hl
+        ld  de, #__xinit__tans
+        add hl, de
+        ld  e, (hl)
+        inc hl
+        ld  d, (hl)
+        ex  de, hl
+    __endasm;
+}
 int getTan(int deg){
     int adeg = absint(deg);
-    return (deg/adeg)*tans[adeg%360/10];
+    return (deg/adeg)*__tanBypass(adeg%360/10);
 }
 #endif
 #ifdef COS_PRE
 signed char cosses[] = {100, 98, 93, 86, 76, 64, 50, 34, 17, 0, -17, -34, -49, -64, -76, -86, -93, -98, -100, -98, -93, -86, -76, -64, -50, -34, -17, 0, 17, 34, 50, 64, 76, 86, 93, 98};
+signed char __cosBypass(int index){
+    __asm
+        ld  a, #<(__xinit__cosses)
+        add a, 4 (ix)
+        ld  c, a
+        ld  a, #>(__xinit__cosses)
+        adc a, 5 (ix)
+        ld  l, c
+        ld  h, a
+        ld  l, (hl)
+    __endasm;
+}
 int getCos(int deg){
-    return cosses[absint(deg)%360/10];
+    return __cosBypass(absint(deg)%360/10);
 }
 #endif
 #ifdef SIN_PRE
+
 signed char sins[] = {0, 17, 34, 49, 64, 76, 86, 93, 98, 100, 98, 93, 86, 76, 64, 49, 34, 17, 0, -17, -34, -50, -64, -76, -86, -93, -98, -100, -98, -93, -86, -76, -64, -50, -34, -17};
+signed char __sinBypass(int index){
+    __asm
+        ld  a, #<(__xinit__sins)
+        add a, 4 (ix)
+        ld  c, a
+        ld  a, #>(__xinit__sins)
+        adc a, 5 (ix)
+        ld  l, c
+        ld  h, a
+        ld  l, (hl)
+    __endasm;
+}
 int getSin(int deg){
     int adeg = absint(deg);
-    return (deg/adeg)*((int)sins[adeg%360/10]);
+    return (deg/adeg)*((int)__sinBypass(adeg%360/10));
 }
 #endif
 

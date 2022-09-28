@@ -1,6 +1,6 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.0.0 #11528 (Linux)
+; Version 4.2.0 #13081 (Linux)
 ;--------------------------------------------------------
 	.module main
 	.optsdcc -mz80
@@ -133,18 +133,11 @@ _resetcursor::
 	ld	(hl), #0x00
 ;../../src/cio.c:12: setPenRow(0);
 	xor	a, a
-	push	af
-	inc	sp
 	call	_setPenRow
-	inc	sp
 ;../../src/cio.c:13: setPenCol(0);
 	xor	a, a
-	push	af
-	inc	sp
-	call	_setPenCol
-	inc	sp
 ;../../src/cio.c:14: }
-	ret
+	jp	_setPenCol
 ;../../src/cio.c:16: void newline() {
 ;	---------------------------------
 ; Function newline
@@ -157,48 +150,33 @@ _newline::
 	ld	(hl), a
 ;../../src/cio.c:18: setPenCol(0);
 	xor	a, a
-	push	af
-	inc	sp
-	call	_setPenCol
-	inc	sp
 ;../../src/cio.c:19: }
-	ret
+	jp	_setPenCol
 ;../../src/cio.c:21: void setPenCol(char col) {
 ;	---------------------------------
 ; Function setPenCol
 ; ---------------------------------
 _setPenCol::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/cio.c:26: __endasm;
 	ld	a, 4(ix)
 	ld	(#0x86D7), a
 ;../../src/cio.c:27: }
-	pop	ix
 	ret
 ;../../src/cio.c:29: void setPenRow(char row) {
 ;	---------------------------------
 ; Function setPenRow
 ; ---------------------------------
 _setPenRow::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/cio.c:34: __endasm;
 	ld	a, 4(ix)
 	ld	(#0x86D8), a
 ;../../src/cio.c:35: }
-	pop	ix
 	ret
 ;../../src/cio.c:37: void vputs(char* s) {
 ;	---------------------------------
 ; Function vputs
 ; ---------------------------------
 _vputs::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/cio.c:42: __endasm;
 	ld	l, 4(ix)
 	ld	h, 5(ix)
@@ -206,87 +184,57 @@ _vputs::
 	rst	40 
 	.dw #0x4561 
 ;../../src/cio.c:44: }
-	pop	ix
 	ret
 ;../../src/cio.c:46: void vputc(char c) {
 ;	---------------------------------
 ; Function vputc
 ; ---------------------------------
 _vputc::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/cio.c:51: __endasm;
 	ld	a, 4(ix)
 ;../../src/cio.c:52: bcall(_vputmap);
 	rst	40 
 	.dw #0x455E 
 ;../../src/cio.c:53: }
-	pop	ix
 	ret
 ;../../src/cio.c:56: void printc(char c) {
 ;	---------------------------------
 ; Function printc
 ; ---------------------------------
 _printc::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
+	ld	c, a
 ;../../src/cio.c:57: setPenRow(__cio__current_line);
+	push	bc
 	ld	a, (#___cio__current_line)
-	push	af
-	inc	sp
 	call	_setPenRow
-	inc	sp
+	pop	bc
 ;../../src/cio.c:58: vputc(c);
-	ld	a, 4 (ix)
-	push	af
-	inc	sp
-	call	_vputc
-	inc	sp
+	ld	a, c
 ;../../src/cio.c:59: }
-	pop	ix
-	ret
+	jp	_vputc
 ;../../src/cio.c:61: void print(char* s) {
 ;	---------------------------------
 ; Function print
 ; ---------------------------------
 _print::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/cio.c:62: setPenRow(__cio__current_line);
-	ld	a, (#___cio__current_line)
-	push	af
-	inc	sp
-	call	_setPenRow
-	inc	sp
-;../../src/cio.c:64: vputs(s);
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
 	push	hl
-	call	_vputs
-	pop	af
+	ld	a, (#___cio__current_line)
+	call	_setPenRow
+	pop	de
+;../../src/cio.c:64: vputs(s);
+	ex	de, hl
 ;../../src/cio.c:65: }
-	pop	ix
-	ret
+	jp	_vputs
 ;../../src/cio.c:67: void println(char* s) {
 ;	---------------------------------
 ; Function println
 ; ---------------------------------
 _println::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/cio.c:68: print(s);
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
 	call	_print
-	pop	af
 ;../../src/cio.c:69: newline();
 ;../../src/cio.c:70: }
-	pop	ix
 	jp	_newline
 ;../../src/cio.c:95: int getKey() {
 ;	---------------------------------
@@ -298,11 +246,12 @@ _getKey::
 	.dw #0x4972 
 ;../../src/cio.c:97: assignAToVar(&__cio__returnValue);
 	ld	hl, #___cio__returnValue
-	push	hl
 	call	_assignAToVar
-	pop	af
 ;../../src/cio.c:98: return __cio__returnValue;
-	ld	hl, (___cio__returnValue)
+	ld	hl, #___cio__returnValue
+	ld	e, (hl)
+	inc	hl
+	ld	d, (hl)
 ;../../src/cio.c:99: }
 	ret
 ;../../src/libti.c:6: void assignAToVar(int* var) {
@@ -310,9 +259,6 @@ _getKey::
 ; Function assignAToVar
 ; ---------------------------------
 _assignAToVar::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/libti.c:16: __endasm;
 	ld	d,4 (ix)
 	ld	e,5 (ix)
@@ -322,76 +268,58 @@ _assignAToVar::
 	inc	hl
 	ld	(hl),#0x00
 ;../../src/libti.c:17: }
-	pop	ix
 	ret
 ;../../src/crapmath.c:120: int absint(int x){
 ;	---------------------------------
 ; Function absint
 ; ---------------------------------
 _absint::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/crapmath.c:121: if (x<0){
-	bit	7, 5 (ix)
-	jr	Z,00102$
+	bit	7, h
+	jr	Z, 00102$
 ;../../src/crapmath.c:122: return 0-x;
 	xor	a, a
-	sub	a, 4 (ix)
-	ld	c, a
-	ld	a, #0x00
-	sbc	a, 5 (ix)
-	ld	b, a
-	ld	l, c
-	ld	h, b
-	jr	00103$
+	sub	a, l
+	ld	e, a
+	sbc	a, a
+	sub	a, h
+	ld	d, a
+	ret
 00102$:
 ;../../src/crapmath.c:124: return x;
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-00103$:
+	ex	de, hl
 ;../../src/crapmath.c:125: }
-	pop	ix
 	ret
 ;../../src/graphics.c:15: int pixpos(int x, int y){
 ;	---------------------------------
 ; Function pixpos
 ; ---------------------------------
 _pixpos::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/graphics.c:16: return (x/8) + (y*12);
-	ld	e, 4 (ix)
-	ld	d, 5 (ix)
-	bit	7, d
-	jr	Z,00103$
-	ld	hl, #0x0007
-	add	hl, de
-	ex	de, hl
+	ld	c, l
+	ld	b, h
+	bit	7, h
+	jr	Z, 00103$
+	ld	bc, #0x7
+	add	hl,bc
+	ld	c, l
+	ld	b, h
 00103$:
-	ld	c, e
-	ld	b, d
 	sra	b
 	rr	c
 	sra	b
 	rr	c
 	sra	b
 	rr	c
-	ld	e, 6 (ix)
-	ld	d, 7 (ix)
 	ld	l, e
 	ld	h, d
 	add	hl, hl
 	add	hl, de
 	add	hl, hl
 	add	hl, hl
+	add	hl, bc
 	ex	de, hl
-	ld	l, c
-	ld	h, b
-	add	hl, de
 ;../../src/graphics.c:17: }
-	pop	ix
 	ret
 ;../../src/graphics.c:21: void setpix(int x, int y ){
 ;	---------------------------------
@@ -401,55 +329,51 @@ _setpix::
 	push	ix
 	ld	ix,#0
 	add	ix,sp
-	dec	sp
+	push	af
+	ex	(sp), hl
 ;../../src/graphics.c:22: buff[pixpos(x, y)] |= 1<<(7-(x%8));
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
+	pop	hl
 	push	hl
 	call	_pixpos
-	pop	af
-	pop	af
-	ld	c, l
-	ld	b, h
 	ld	hl, #_buff
 	ld	a, (hl)
-	add	a, c
-	ld	e, a
 	inc	hl
+	add	a, e
+	ld	c, a
 	ld	a, (hl)
-	adc	a, b
-	ld	d, a
-	ld	a, (de)
-	ld	-1 (ix), a
-	push	de
-	ld	hl, #0x0008
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
-	call	__modsint
-	pop	af
-	pop	af
-	ld	c, l
-	pop	de
-	ld	a, #0x07
-	sub	a, c
+	adc	a, d
 	ld	b, a
-	ld	c, #0x01
-	inc	b
+	ld	a, (bc)
+	ld	l, a
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	push	bc
+	ld	de, #0x0008
+	ld	l, -2 (ix)
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, -1 (ix)
+;	spillPairReg hl
+;	spillPairReg hl
+	call	__modsint
+	pop	bc
+	pop	hl
+	ld	a, #0x07
+	sub	a, e
+	ld	e, a
+	ld	a, #0x01
+	inc	e
 	jr	00104$
 00103$:
-	sla	c
+	add	a, a
 00104$:
-	djnz	00103$
-	ld	a, -1 (ix)
-	or	a, c
-	ld	(de), a
+	dec	e
+	jr	NZ,00103$
+	or	a, l
+	ld	(bc), a
 ;../../src/graphics.c:23: }
-	inc	sp
+	ld	sp, ix
 	pop	ix
 	ret
 ;../../src/graphics.c:46: void line(int x0, int y0, int x1, int y1) {
@@ -460,55 +384,61 @@ _line::
 	push	ix
 	ld	ix,#0
 	add	ix,sp
-	ld	hl, #-14
-	add	hl, sp
-	ld	sp, hl
-;../../src/graphics.c:48: int dx = absint(x1-x0), sx = x0<x1 ? 1 : -1;
-	ld	a, 8 (ix)
-	sub	a, 4 (ix)
-	ld	c, a
-	ld	a, 9 (ix)
-	sbc	a, 5 (ix)
-	ld	b, a
-	push	bc
-	call	_absint
-	pop	af
 	ld	c, l
 	ld	b, h
-	inc	sp
-	inc	sp
-	push	bc
+	ld	hl, #-19
+	add	hl, sp
+	ld	sp, hl
+	ld	l,c
+	ld	h,b
+	ld	-6 (ix), e
+	ld	-5 (ix), d
+;../../src/graphics.c:48: int dx = absint(x1-x0), sx = x0<x1 ? 1 : -1;
 	ld	a, 4 (ix)
-	sub	a, 8 (ix)
+	sub	a, c
+	ld	e, a
 	ld	a, 5 (ix)
-	sbc	a, 9 (ix)
+	sbc	a, b
+	ld	d, a
+	push	bc
+	ex	de, hl
+	call	_absint
+	pop	bc
+	inc	sp
+	inc	sp
+	push	de
+	ld	a, c
+	sub	a, 4 (ix)
+	ld	a, b
+	sbc	a, 5 (ix)
 	jp	PO, 00204$
 	xor	a, #0x80
 00204$:
 	jp	P, 00125$
-	ld	bc, #0x0001
+	ld	de, #0x0001
 	jr	00126$
 00125$:
-	ld	bc, #0xffff
+	ld	de, #0xffff
 00126$:
-	ld	-7 (ix), c
-	ld	-6 (ix), b
+	ld	-8 (ix), e
+	ld	-7 (ix), d
 ;../../src/graphics.c:49: int dy = absint(y1-y0), sy = (y0<y1 ? 1 : -1)*12, sy1 = (y0<y1 ? 1 : -1); 
-	ld	a, 10 (ix)
-	sub	a, 6 (ix)
-	ld	c, a
-	ld	a, 11 (ix)
-	sbc	a, 7 (ix)
-	ld	b, a
-	push	bc
-	call	_absint
-	pop	af
-	ld	c, l
-	ld	b, h
 	ld	a, 6 (ix)
-	sub	a, 10 (ix)
+	sub	a, -6 (ix)
+	ld	e, a
 	ld	a, 7 (ix)
-	sbc	a, 11 (ix)
+	sbc	a, -5 (ix)
+	ld	d, a
+	push	bc
+	ex	de, hl
+	call	_absint
+	pop	bc
+	ld	-17 (ix), e
+	ld	-16 (ix), d
+	ld	a, -6 (ix)
+	sub	a, 6 (ix)
+	ld	a, -5 (ix)
+	sbc	a, 7 (ix)
 	jp	PO, 00205$
 	xor	a, #0x80
 00205$:
@@ -516,7 +446,7 @@ _line::
 	and	a,#0x01
 	ld	e, a
 	or	a, a
-	jr	Z,00127$
+	jr	Z, 00127$
 	ld	hl, #0x0001
 	jr	00128$
 00127$:
@@ -530,23 +460,23 @@ _line::
 	add	hl, hl
 	add	hl, hl
 	pop	de
-	ld	-12 (ix), l
-	ld	-11 (ix), h
+	ld	-15 (ix), l
+	ld	-14 (ix), h
 	ld	a, e
 	or	a, a
-	jr	Z,00129$
+	jr	Z, 00129$
 	ld	de, #0x0001
 	jr	00130$
 00129$:
 	ld	de, #0xffff
 00130$:
-	ld	-10 (ix), e
-	ld	-9 (ix), d
+	ld	-13 (ix), e
+	ld	-12 (ix), d
 ;../../src/graphics.c:50: int err = (dx>dy ? dx : -dy)/2, e2;
-	ld	a, c
-	sub	a, -14 (ix)
-	ld	a, b
-	sbc	a, -13 (ix)
+	ld	a, -17 (ix)
+	sub	a, -19 (ix)
+	ld	a, -16 (ix)
+	sbc	a, -18 (ix)
 	jp	PO, 00206$
 	xor	a, #0x80
 00206$:
@@ -555,220 +485,227 @@ _line::
 	push	hl
 	jr	00132$
 00131$:
-	ld	hl, #0x0000
-	cp	a, a
-	sbc	hl, bc
+	xor	a, a
+	sub	a, -17 (ix)
+	ld	l, a
+;	spillPairReg hl
+;	spillPairReg hl
+	sbc	a, a
+	sub	a, -16 (ix)
+	ld	h, a
+;	spillPairReg hl
+;	spillPairReg hl
 00132$:
 	ld	e, l
 	ld	d, h
 	bit	7, h
-	jr	Z,00133$
-	ex	de,hl
+	jr	Z, 00133$
+	ex	de, hl
 	inc	de
 00133$:
-	ld	-5 (ix), e
-	ld	-4 (ix), d
-	sra	-4 (ix)
-	rr	-5 (ix)
+	ld	-4 (ix), e
+	ld	-3 (ix), d
+	sra	-3 (ix)
+	rr	-4 (ix)
 ;../../src/graphics.c:51: int pp = pixpos(x0, y0);
 	push	bc
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
+	ld	e, -6 (ix)
+	ld	d, -5 (ix)
+	ld	l, c
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, b
+;	spillPairReg hl
+;	spillPairReg hl
 	call	_pixpos
-	pop	af
-	pop	af
-	ex	de,hl
 	pop	bc
-	ld	-3 (ix), e
-	ld	-2 (ix), d
+	ld	-2 (ix), e
+	ld	-1 (ix), d
 ;../../src/graphics.c:52: char pxor = 1<<(7-(x0%8));
 	push	bc
-	ld	hl, #0x0008
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
+	ld	de, #0x0008
+	ld	l, c
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, b
+;	spillPairReg hl
+;	spillPairReg hl
 	call	__modsint
-	pop	af
-	pop	af
-	ld	e, l
 	pop	bc
 	ld	a, #0x07
 	sub	a, e
-	ld	-1 (ix), #0x01
-	inc	a
+	ld	d, a
+	ld	e, #0x01
+	inc	d
 	jr	00208$
 00207$:
-	sla	-1 (ix)
+	sla	e
 00208$:
-	dec	a
+	dec	d
 	jr	NZ,00207$
-	ld	a, -7 (ix)
+	ld	a, -8 (ix)
 	dec	a
-	or	a, -6 (ix)
+	or	a, -7 (ix)
 	ld	a, #0x01
-	jr	Z,00210$
+	jr	Z, 00210$
 	xor	a, a
 00210$:
-	ld	-8 (ix), a
+	ld	-11 (ix), a
 	xor	a, a
-	sub	a, -14 (ix)
-	ld	-7 (ix), a
-	ld	a, #0x00
-	sbc	a, -13 (ix)
-	ld	-6 (ix), a
+	sub	a, -19 (ix)
+	ld	-10 (ix), a
+	sbc	a, a
+	sub	a, -18 (ix)
+	ld	-9 (ix), a
 00121$:
 ;../../src/graphics.c:54: if (x0 < XMAX && y0 < YMAX )
-	ld	a, 4 (ix)
+	ld	a, c
 	sub	a, #0x60
-	ld	a, 5 (ix)
+	ld	a, b
 	rla
 	ccf
 	rra
 	sbc	a, #0x80
-	jr	NC,00102$
-	ld	a, 6 (ix)
+	jr	NC, 00102$
+	ld	a, -6 (ix)
 	sub	a, #0x40
-	ld	a, 7 (ix)
+	ld	a, -5 (ix)
 	rla
 	ccf
 	rra
 	sbc	a, #0x80
-	jr	NC,00102$
+	jr	NC, 00102$
 ;../../src/graphics.c:55: buff[pp] |= pxor;
 	ld	hl, #_buff
 	ld	a, (hl)
-	add	a, -3 (ix)
-	ld	e, a
+	add	a, -2 (ix)
+	ld	-8 (ix), a
 	inc	hl
 	ld	a, (hl)
-	adc	a, -2 (ix)
-	ld	d, a
-	ld	a, (de)
-	or	a, -1 (ix)
-	ld	(de), a
+	adc	a, -1 (ix)
+	ld	-7 (ix), a
+	ld	l, -8 (ix)
+	ld	h, -7 (ix)
+	ld	a, (hl)
+	or	a, e
+	ld	l, -8 (ix)
+	ld	h, -7 (ix)
+	ld	(hl), a
 00102$:
 ;../../src/graphics.c:56: if (x0==x1 && y0==y1) break;
-	ld	a, 4 (ix)
-	sub	a, 8 (ix)
-	jr	NZ,00105$
-	ld	a, 5 (ix)
-	sub	a, 9 (ix)
-	jr	NZ,00105$
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+	cp	a, a
+	sbc	hl, bc
+	jr	NZ, 00105$
 	ld	a, 6 (ix)
-	sub	a, 10 (ix)
-	jr	NZ,00213$
+	sub	a, -6 (ix)
+	jr	NZ, 00213$
 	ld	a, 7 (ix)
-	sub	a, 11 (ix)
+	sub	a, -5 (ix)
 	jp	Z,00123$
 00213$:
 00105$:
 ;../../src/graphics.c:57: e2 = err;
-	ld	e, -5 (ix)
 	ld	d, -4 (ix)
+	ld	l, -3 (ix)
+;	spillPairReg hl
+;	spillPairReg hl
 ;../../src/graphics.c:58: if (e2 >-dx) { err -= dy; 
-	ld	a, -7 (ix)
-	sub	a, -5 (ix)
-	ld	a, -6 (ix)
-	sbc	a, -4 (ix)
+	ld	a, -10 (ix)
+	sub	a, -4 (ix)
+	ld	a, -9 (ix)
+	sbc	a, -3 (ix)
 	jp	PO, 00214$
 	xor	a, #0x80
 00214$:
 	jp	P, 00117$
-	ld	a, -5 (ix)
-	sub	a, c
-	ld	-5 (ix), a
 	ld	a, -4 (ix)
-	sbc	a, b
+	sub	a, -17 (ix)
 	ld	-4 (ix), a
+	ld	a, -3 (ix)
+	sbc	a, -16 (ix)
+	ld	-3 (ix), a
 ;../../src/graphics.c:59: if (sx == 1){
-	ld	a, -8 (ix)
+	ld	a, -11 (ix)
 	or	a, a
-	jr	Z,00114$
+	jr	Z, 00114$
 ;../../src/graphics.c:61: if (pxor != 1)
-	ld	a, -1 (ix)
+	ld	a, e
 	dec	a
-	jr	Z,00108$
+	jr	Z, 00108$
 ;../../src/graphics.c:62: pxor = pxor>>1;
-	srl	-1 (ix)
+	srl	e
 	jr	00109$
 00108$:
 ;../../src/graphics.c:64: pp+=1;
-	inc	-3 (ix)
-	jr	NZ,00216$
 	inc	-2 (ix)
+	jr	NZ, 00216$
+	inc	-1 (ix)
 00216$:
 ;../../src/graphics.c:65: pxor=128;
-	ld	-1 (ix), #0x80
+	ld	e, #0x80
 00109$:
 ;../../src/graphics.c:67: x0+=1;
-	inc	4 (ix)
-	jr	NZ,00117$
-	inc	5 (ix)
+	inc	bc
 	jr	00117$
 00114$:
 ;../../src/graphics.c:70: x0-=1;
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	dec	hl
-	ld	4 (ix), l
-	ld	5 (ix), h
+	dec	bc
 ;../../src/graphics.c:71: if (pxor != 128)
-	ld	a, -1 (ix)
+	ld	a, e
 	sub	a, #0x80
-	jr	Z,00111$
+	jr	Z, 00111$
 ;../../src/graphics.c:72: pxor = pxor<<1;
-	ld	a, -1 (ix)
-	add	a, a
-	ld	-1 (ix), a
+	sla	e
 	jr	00117$
 00111$:
 ;../../src/graphics.c:74: pp-=1;
-	ld	l, -3 (ix)
-	ld	h, -2 (ix)
-	dec	hl
-	ld	-3 (ix), l
-	ld	-2 (ix), h
+	ld	a, -2 (ix)
+	add	a, #0xff
+	ld	-2 (ix), a
+	ld	a, -1 (ix)
+	adc	a, #0xff
+	ld	-1 (ix), a
 ;../../src/graphics.c:75: pxor=1;
-	ld	-1 (ix), #0x01
+	ld	e, #0x01
 00117$:
 ;../../src/graphics.c:79: if (e2 < dy) { err += dx; pp += sy;y0+=sy1; }
-	ld	a, e
-	sub	a, c
 	ld	a, d
-	sbc	a, b
-	jp	PO, 00219$
+	sub	a, -17 (ix)
+	ld	a, l
+	sbc	a, -16 (ix)
+	jp	PO, 00218$
 	xor	a, #0x80
-00219$:
+00218$:
 	jp	P, 00121$
-	ld	a, -5 (ix)
-	add	a, -14 (ix)
-	ld	-5 (ix), a
 	ld	a, -4 (ix)
-	adc	a, -13 (ix)
+	add	a, -19 (ix)
 	ld	-4 (ix), a
 	ld	a, -3 (ix)
-	add	a, -12 (ix)
+	adc	a, -18 (ix)
 	ld	-3 (ix), a
 	ld	a, -2 (ix)
-	adc	a, -11 (ix)
+	add	a, -15 (ix)
 	ld	-2 (ix), a
-	ld	a, 6 (ix)
-	add	a, -10 (ix)
-	ld	6 (ix), a
-	ld	a, 7 (ix)
-	adc	a, -9 (ix)
-	ld	7 (ix), a
+	ld	a, -1 (ix)
+	adc	a, -14 (ix)
+	ld	-1 (ix), a
+	ld	a, -6 (ix)
+	add	a, -13 (ix)
+	ld	-6 (ix), a
+	ld	a, -5 (ix)
+	adc	a, -12 (ix)
+	ld	-5 (ix), a
 	jp	00121$
 00123$:
 ;../../src/graphics.c:81: }
 	ld	sp, ix
 	pop	ix
-	ret
+	pop	hl
+	pop	af
+	pop	af
+	jp	(hl)
 ;../../src/graphics.c:83: void badclr(){
 ;	---------------------------------
 ; Function badclr
@@ -784,9 +721,9 @@ _badclr::
 ;../../src/graphics.c:85: buff[x] = 0;
 	ld	hl, #_buff
 	ld	a, (hl)
+	inc	hl
 	add	a, c
 	ld	e, a
-	inc	hl
 	ld	a, (hl)
 	adc	a, b
 	ld	d, a
@@ -811,9 +748,9 @@ _badfill::
 ;../../src/graphics.c:90: buff[x] = 0xFF;
 	ld	hl, #_buff
 	ld	a, (hl)
+	inc	hl
 	add	a, c
 	ld	e, a
-	inc	hl
 	ld	a, (hl)
 	adc	a, b
 	ld	d, a
@@ -831,96 +768,92 @@ _number::
 	push	ix
 	ld	ix,#0
 	add	ix,sp
-	ld	hl, #-29
+	ld	c, l
+	ld	b, h
+	ld	hl, #-27
 	add	hl, sp
 	ld	sp, hl
 ;../../src/graphics.c:96: if (x<0){
-	bit	7, 5 (ix)
-	jr	Z,00113$
+	bit	7, b
+	jr	Z, 00113$
 ;../../src/graphics.c:97: x=0-x;
 	xor	a, a
-	sub	a, 4 (ix)
-	ld	4 (ix), a
-	ld	a, #0x00
-	sbc	a, 5 (ix)
-	ld	5 (ix), a
+	sub	a, c
+	ld	c, a
+	sbc	a, a
+	sub	a, b
+	ld	b, a
 ;../../src/graphics.c:98: printc('-');
+	push	bc
 	ld	a, #0x2d
-	push	af
-	inc	sp
 	call	_printc
-	inc	sp
+	pop	bc
 ;../../src/graphics.c:101: do {
 00113$:
-	ld	hl, #0
-	add	hl, sp
-	ld	-4 (ix), l
-	ld	-3 (ix), h
-	ld	bc, #0x0000
+	xor	a, a
+	ld	-2 (ix), a
+	ld	-1 (ix), a
 00103$:
 ;../../src/graphics.c:102: out[i]=x % 10 + '0';
-	ld	a, -4 (ix)
-	add	a, c
-	ld	e, a
-	ld	a, -3 (ix)
-	adc	a, b
-	ld	d, a
+	ld	e, -2 (ix)
+	ld	d, -1 (ix)
+	ld	hl, #0
+	add	hl, sp
+	add	hl, de
+	push	hl
 	push	bc
-	push	de
-	ld	hl, #0x000a
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
+	ld	de, #0x000a
+	ld	l, c
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, b
+;	spillPairReg hl
+;	spillPairReg hl
 	call	__modsint
-	pop	af
-	pop	af
-	ld	-2 (ix), l
-	ld	-1 (ix), h
-	pop	de
 	pop	bc
-	ld	a, -2 (ix)
+	pop	hl
+	ld	a, e
 	add	a, #0x30
-	ld	(de), a
+	ld	(hl), a
 ;../../src/graphics.c:103: i+=1;
-	inc	bc
+	inc	-2 (ix)
+	jr	NZ, 00139$
+	inc	-1 (ix)
+00139$:
 ;../../src/graphics.c:104: } while((x /= 10) > 0);
-	push	bc
-	ld	hl, #0x000a
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
+	ld	de, #0x000a
+	ld	l, c
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, b
+;	spillPairReg hl
+;	spillPairReg hl
 	call	__divsint
-	pop	af
-	pop	af
-	ex	de,hl
-	pop	bc
-	ld	4 (ix), e
-	ld	5 (ix), d
+	ld	c, e
+	ld	b, d
 	xor	a, a
 	cp	a, e
 	sbc	a, d
-	jp	PO, 00139$
+	jp	PO, 00140$
 	xor	a, #0x80
-00139$:
+00140$:
 	jp	M, 00103$
 ;../../src/graphics.c:105: i--;
+	ld	c, -2 (ix)
+	ld	b, -1 (ix)
 	dec	bc
 00108$:
 ;../../src/graphics.c:106: for(;i>=0; i--){
 	bit	7, b
-	jr	NZ,00110$
+	jr	NZ, 00110$
 ;../../src/graphics.c:107: printc(out[i]);
-	ld	l, -4 (ix)
-	ld	h, -3 (ix)
+	ld	hl, #0
+	add	hl, sp
 	add	hl, bc
-	ld	a, (hl)
+	ld	e, (hl)
 	push	bc
-	push	af
-	inc	sp
+	ld	a, e
 	call	_printc
-	inc	sp
 	pop	bc
 ;../../src/graphics.c:106: for(;i>=0; i--){
 	dec	bc
@@ -938,95 +871,91 @@ _numberslong::
 	push	ix
 	ld	ix,#0
 	add	ix,sp
+	ld	c, l
+	ld	b, h
 	ld	hl, #-31
 	add	hl, sp
 	ld	sp, hl
+	ld	l, c
+	ld	h, b
+	ld	-4 (ix), e
+	ld	-3 (ix), d
+	ld	-2 (ix), l
+	ld	-1 (ix), h
 ;../../src/graphics.c:115: do {
-	ld	hl, #0
-	add	hl, sp
-	ld	-6 (ix), l
-	ld	-5 (ix), h
-	xor	a, a
-	ld	-2 (ix), a
-	ld	-1 (ix), a
+	ld	bc, #0x0000
 00101$:
 ;../../src/graphics.c:116: out[i]=x % 10 + '0';
-	ld	a, -6 (ix)
-	add	a, -2 (ix)
-	ld	-4 (ix), a
-	ld	a, -5 (ix)
-	adc	a, -1 (ix)
-	ld	-3 (ix), a
+	ld	hl, #0
+	add	hl, sp
+	add	hl, bc
+	ld	-6 (ix), l
+	ld	-5 (ix), h
+	push	bc
 	ld	hl, #0x0000
 	push	hl
-	ld	hl, #0x000a
+	ld	l, #0x0a
 	push	hl
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
+	ld	e, -4 (ix)
+	ld	d, -3 (ix)
+	ld	l, -2 (ix)
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, -1 (ix)
+;	spillPairReg hl
+;	spillPairReg hl
 	call	__modulong
 	pop	af
 	pop	af
-	pop	af
-	pop	af
-	ld	a, l
+	pop	bc
+	ld	a, e
 	add	a, #0x30
-	ld	l, -4 (ix)
-	ld	h, -3 (ix)
+	ld	l, -6 (ix)
+	ld	h, -5 (ix)
 	ld	(hl), a
 ;../../src/graphics.c:117: i+=1;
-	inc	-2 (ix)
-	jr	NZ,00132$
-	inc	-1 (ix)
-00132$:
+	inc	bc
 ;../../src/graphics.c:118: } while((x /= 10) > 0);
+	push	bc
 	ld	hl, #0x0000
 	push	hl
-	ld	hl, #0x000a
+	ld	l, #0x0a
 	push	hl
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
+	ld	e, -4 (ix)
+	ld	d, -3 (ix)
+	ld	l, -2 (ix)
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, -1 (ix)
+;	spillPairReg hl
+;	spillPairReg hl
 	call	__divulong
 	pop	af
 	pop	af
-	pop	af
-	pop	af
-	ld	c, l
-	ld	b, h
-	ld	4 (ix), c
-	ld	5 (ix), b
-	ld	6 (ix), e
-	ld	7 (ix), d
-	ld	a, d
+	pop	bc
+	ld	-4 (ix), e
+	ld	-3 (ix), d
+	ld	-2 (ix), l
+	ld	-1 (ix), h
+	ld	a, h
+	or	a, l
+	or	a, d
 	or	a, e
-	or	a, b
-	or	a, c
-	jr	NZ,00101$
+	jr	NZ, 00101$
 ;../../src/graphics.c:119: i--;
-	ld	c, -2 (ix)
-	ld	b, -1 (ix)
 	dec	bc
 00106$:
 ;../../src/graphics.c:120: for(;i>=0; i--){
 	bit	7, b
-	jr	NZ,00108$
+	jr	NZ, 00108$
 ;../../src/graphics.c:121: printc(out[i]);
-	ld	l, -6 (ix)
-	ld	h, -5 (ix)
+	ld	hl, #0
+	add	hl, sp
 	add	hl, bc
-	ld	a, (hl)
+	ld	e, (hl)
 	push	bc
-	push	af
-	inc	sp
+	ld	a, e
 	call	_printc
-	inc	sp
 	pop	bc
 ;../../src/graphics.c:120: for(;i>=0; i--){
 	dec	bc
@@ -1041,9 +970,6 @@ _numberslong::
 ; Function wait128
 ; ---------------------------------
 _wait128::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
 ;../../src/graphics.c:166: __endasm;
 	di
 	ld	a,#0x46 ;128 hz
@@ -1060,7 +986,6 @@ _wait128::
 	out	(#0x30),a ;Turn off the timer.
 	out	(#0x31),a
 ;../../src/graphics.c:167: }
-	pop	ix
 	ret
 ;../../src/graphics.c:171: void swap(){
 ;	---------------------------------
@@ -1081,9 +1006,9 @@ _getKeyId::
 	rst	40 
 	.dw 0x4015 
 ;../../src/graphics.c:243: return (int)(*((char*)(0x843F)));}
-	ld	hl, #0x843f
-	ld	l, (hl)
-	ld	h, #0x00
+	ld	a, (#0x843f)
+	ld	e, a
+	ld	d, #0x00
 	ret
 ;../../src/graphics.c:249: void init_graphics(){
 ;	---------------------------------
@@ -1125,12 +1050,10 @@ _randomInt::
 ;../../src/graphics.c:278: assignAToVar(&x);
 	ld	hl, #0
 	add	hl, sp
-	push	hl
 	call	_assignAToVar
-	pop	af
 ;../../src/graphics.c:279: return x;
-	pop	hl
-	push	hl
+	pop	de
+	push	de
 ;../../src/graphics.c:280: }
 	ld	sp, ix
 	pop	ix
@@ -1163,7 +1086,9 @@ _set_lcd::
 	out	(#0x11), a
 ;../../src/raw_display.c:31: }
 	pop	ix
-	ret
+	pop	hl
+	inc	sp
+	jp	(hl)
 ;../../src/raw_display.c:95: void lwait(){
 ;	---------------------------------
 ; Function lwait
@@ -1186,13 +1111,13 @@ _fast_fill::
 00107$:
 	ld	a, c
 	sub	a, #0x3f
-	jr	NC,00102$
+	jr	NC, 00102$
 ;../../src/raw_display.c:105: for (char  r = 0x80; r < 0xBF; ++r){
 	ld	b, #0x80
 00104$:
 	ld	a, b
 	sub	a, #0xbf
-	jr	NC,00108$
+	jr	NC, 00108$
 ;../../src/raw_display.c:118: __endasm;
 	ld	d, a
 	out	(#0x10), a
@@ -1231,76 +1156,70 @@ _paddle::
 	push	ix
 	ld	ix,#0
 	add	ix,sp
+	push	af
+	push	af
+	ld	-2 (ix), e
+	ld	-1 (ix), d
 ;main.c:36: line(x, y, x+paddle_width, y);
-	ld	c, 4 (ix)
-	ld	b, 5 (ix)
+	ld	c, l
+	ld	b, h
 	inc	bc
 	inc	bc
-	push	bc
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
 	push	hl
 	push	bc
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
+	ld	e, -2 (ix)
+	ld	d, -1 (ix)
+	push	de
+	push	bc
+	ld	e, -2 (ix)
+	ld	d, -1 (ix)
 	call	_line
-	ld	hl, #8
-	add	hl, sp
-	ld	sp, hl
 	pop	bc
+	pop	hl
 ;main.c:37: line(x, y+paddle_len, x+paddle_width, y+paddle_len);
-	ld	a, 6 (ix)
+	ld	a, -2 (ix)
 	add	a, #0x0f
-	ld	e, a
-	ld	a, 7 (ix)
+	ld	-4 (ix), a
+	ld	a, -1 (ix)
 	adc	a, #0x00
-	ld	d, a
+	ld	-3 (ix), a
+	push	hl
 	push	bc
-	push	de
+	ld	e, -4 (ix)
+	ld	d, -3 (ix)
 	push	de
 	push	bc
-	push	de
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
+	ld	e, -4 (ix)
+	ld	d, -3 (ix)
 	call	_line
-	ld	hl, #8
-	add	hl, sp
-	ld	sp, hl
-	pop	de
+	pop	bc
+	pop	hl
+;main.c:39: line(x, y, x, y+paddle_len);
+	push	bc
+	ld	e, -4 (ix)
+	ld	d, -3 (ix)
 	push	de
-	push	de
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
 	push	hl
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
+	ld	e, -2 (ix)
+	ld	d, -1 (ix)
 	call	_line
-	ld	hl, #8
-	add	hl, sp
-	ld	sp, hl
-	pop	de
 	pop	bc
 ;main.c:40: line(x+paddle_width, y, x+paddle_width, y+paddle_len);
-	push	de
-	push	bc
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
+	pop	hl
+	push	hl
 	push	hl
 	push	bc
+	ld	e, -2 (ix)
+	ld	d, -1 (ix)
+	ld	l, c
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, b
+;	spillPairReg hl
+;	spillPairReg hl
 	call	_line
-	ld	hl, #8
-	add	hl, sp
-	ld	sp, hl
 ;main.c:41: }
+	ld	sp, ix
 	pop	ix
 	ret
 ;main.c:77: void main() {

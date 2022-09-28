@@ -1,6 +1,6 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.1.0 #12072 (Linux)
+; Version 4.0.0 #11528 (Linux)
 ;--------------------------------------------------------
 	.module main
 	.optsdcc -mz80
@@ -9,19 +9,9 @@
 ; Public variables in this module
 ;--------------------------------------------------------
 	.globl _main
-	.globl _makeApple
-	.globl _checkCol
-	.globl _move
-	.globl _drawapple
-	.globl _drawblock
-	.globl _menu_loop
-	.globl _menu_putstr
-	.globl _randomInt
-	.globl _resetRandomSeed
 	.globl _init_graphics
 	.globl _getKeyId
 	.globl _swap
-	.globl _wait128
 	.globl _numberslong
 	.globl _number
 	.globl _badfill
@@ -34,15 +24,7 @@
 	.globl _absint
 	.globl _printc
 	.globl ___cio__current_line
-	.globl _hardness
 	.globl _Vtrack
-	.globl _by
-	.globl _bx
-	.globl _bklen
-	.globl _ay
-	.globl _ax
-	.globl _hy
-	.globl _hx
 	.globl _buff
 	.globl ___cio__buffer
 	.globl ___cio__j
@@ -91,23 +73,7 @@ ___cio__buffer::
 	.ds 16
 _buff::
 	.ds 2
-_hx::
-	.ds 2
-_hy::
-	.ds 2
-_ax::
-	.ds 2
-_ay::
-	.ds 2
-_bklen::
-	.ds 2
-_bx::
-	.ds 2
-_by::
-	.ds 2
 _Vtrack::
-	.ds 2
-_hardness::
 	.ds 2
 ;--------------------------------------------------------
 ; ram data
@@ -299,13 +265,12 @@ _print::
 ; ---------------------------------
 _println::
 	push	ix
+	ld	ix,#0
+	add	ix,sp
 ;../../src/cio.c:68: print(s);
-	ld	hl, #0 + 4
-	add	hl, sp
-	ld	c, (hl)
-	inc	hl
-	ld	b, (hl)
-	push	bc
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+	push	hl
 	call	_print
 	pop	af
 ;../../src/cio.c:69: newline();
@@ -358,15 +323,16 @@ _absint::
 	add	ix,sp
 ;../../src/crapmath.c:121: if (x<0){
 	bit	7, 5 (ix)
-	jr	Z, 00102$
+	jr	Z,00102$
 ;../../src/crapmath.c:122: return 0-x;
 	xor	a, a
 	sub	a, 4 (ix)
-	ld	e, a
+	ld	c, a
 	ld	a, #0x00
 	sbc	a, 5 (ix)
-	ld	d, a
-	ex	de, hl
+	ld	b, a
+	ld	l, c
+	ld	h, b
 	jr	00103$
 00102$:
 ;../../src/crapmath.c:124: return x;
@@ -446,7 +412,7 @@ _pixpos::
 	ld	e, 4 (ix)
 	ld	d, 5 (ix)
 	bit	7, d
-	jr	Z, 00103$
+	jr	Z,00103$
 	ld	hl, #0x0007
 	add	hl, de
 	ex	de, hl
@@ -493,18 +459,19 @@ _setpix::
 	call	_pixpos
 	pop	af
 	pop	af
-	ex	de, hl
+	ld	c, l
+	ld	b, h
 	ld	hl, #_buff
 	ld	a, (hl)
-	add	a, e
-	ld	c, a
+	add	a, c
+	ld	e, a
 	inc	hl
 	ld	a, (hl)
-	adc	a, d
-	ld	b, a
-	ld	a, (bc)
+	adc	a, b
+	ld	d, a
+	ld	a, (de)
 	ld	-1 (ix), a
-	push	bc
+	push	de
 	ld	hl, #0x0008
 	push	hl
 	ld	l, 4 (ix)
@@ -513,21 +480,21 @@ _setpix::
 	call	__modsint
 	pop	af
 	pop	af
-	ex	de, hl
-	pop	bc
+	ld	c, l
+	pop	de
 	ld	a, #0x07
-	sub	a, e
-	ld	e, a
-	ld	a, #0x01
-	inc	e
+	sub	a, c
+	ld	b, a
+	ld	c, #0x01
+	inc	b
 	jr	00104$
 00103$:
-	add	a, a
+	sla	c
 00104$:
-	dec	e
-	jr	NZ,00103$
-	or	a, -1 (ix)
-	ld	(bc), a
+	djnz	00103$
+	ld	a, -1 (ix)
+	or	a, c
+	ld	(de), a
 ;../../src/graphics.c:23: }
 	inc	sp
 	pop	ix
@@ -553,10 +520,11 @@ _line::
 	push	bc
 	call	_absint
 	pop	af
-	ex	de, hl
+	ld	c, l
+	ld	b, h
 	inc	sp
 	inc	sp
-	push	de
+	push	bc
 	ld	a, 4 (ix)
 	sub	a, 8 (ix)
 	ld	a, 5 (ix)
@@ -582,7 +550,8 @@ _line::
 	push	bc
 	call	_absint
 	pop	af
-	ex	de, hl
+	ld	c, l
+	ld	b, h
 	ld	a, 6 (ix)
 	sub	a, 10 (ix)
 	ld	a, 7 (ix)
@@ -592,9 +561,9 @@ _line::
 00205$:
 	rlca
 	and	a,#0x01
-	ld	c, a
+	ld	e, a
 	or	a, a
-	jr	Z, 00127$
+	jr	Z,00127$
 	ld	hl, #0x0001
 	jr	00128$
 00127$:
@@ -610,20 +579,20 @@ _line::
 	pop	de
 	ld	-12 (ix), l
 	ld	-11 (ix), h
-	ld	a, c
+	ld	a, e
 	or	a, a
-	jr	Z, 00129$
-	ld	bc, #0x0001
+	jr	Z,00129$
+	ld	de, #0x0001
 	jr	00130$
 00129$:
-	ld	bc, #0xffff
+	ld	de, #0xffff
 00130$:
-	ld	-10 (ix), c
-	ld	-9 (ix), b
+	ld	-10 (ix), e
+	ld	-9 (ix), d
 ;../../src/graphics.c:50: int err = (dx>dy ? dx : -dy)/2, e2;
-	ld	a, e
+	ld	a, c
 	sub	a, -14 (ix)
-	ld	a, d
+	ld	a, b
 	sbc	a, -13 (ix)
 	jp	PO, 00206$
 	xor	a, #0x80
@@ -635,22 +604,21 @@ _line::
 00131$:
 	ld	hl, #0x0000
 	cp	a, a
-	sbc	hl, de
+	sbc	hl, bc
 00132$:
-	ld	c, l
-	ld	b, h
+	ld	e, l
+	ld	d, h
 	bit	7, h
-	jr	Z, 00133$
-	inc	hl
-	ld	c, l
-	ld	b, h
+	jr	Z,00133$
+	ex	de,hl
+	inc	de
 00133$:
-	ld	-5 (ix), c
-	ld	-4 (ix), b
+	ld	-5 (ix), e
+	ld	-4 (ix), d
 	sra	-4 (ix)
 	rr	-5 (ix)
 ;../../src/graphics.c:51: int pp = pixpos(x0, y0);
-	push	de
+	push	bc
 	ld	l, 6 (ix)
 	ld	h, 7 (ix)
 	push	hl
@@ -660,13 +628,12 @@ _line::
 	call	_pixpos
 	pop	af
 	pop	af
-	ld	c, l
-	ld	b, h
-	pop	de
-	ld	-3 (ix), c
-	ld	-2 (ix), b
+	ex	de,hl
+	pop	bc
+	ld	-3 (ix), e
+	ld	-2 (ix), d
 ;../../src/graphics.c:52: char pxor = 1<<(7-(x0%8));
-	push	de
+	push	bc
 	ld	hl, #0x0008
 	push	hl
 	ld	l, 4 (ix)
@@ -675,10 +642,10 @@ _line::
 	call	__modsint
 	pop	af
 	pop	af
-	ld	c, l
-	pop	de
+	ld	e, l
+	pop	bc
 	ld	a, #0x07
-	sub	a, c
+	sub	a, e
 	ld	-1 (ix), #0x01
 	inc	a
 	jr	00208$
@@ -691,7 +658,7 @@ _line::
 	dec	a
 	or	a, -6 (ix)
 	ld	a, #0x01
-	jr	Z, 00210$
+	jr	Z,00210$
 	xor	a, a
 00210$:
 	ld	-8 (ix), a
@@ -710,7 +677,7 @@ _line::
 	ccf
 	rra
 	sbc	a, #0x80
-	jr	NC, 00102$
+	jr	NC,00102$
 	ld	a, 6 (ix)
 	sub	a, #0x40
 	ld	a, 7 (ix)
@@ -718,38 +685,38 @@ _line::
 	ccf
 	rra
 	sbc	a, #0x80
-	jr	NC, 00102$
+	jr	NC,00102$
 ;../../src/graphics.c:55: buff[pp] |= pxor;
 	ld	hl, #_buff
 	ld	a, (hl)
 	add	a, -3 (ix)
-	ld	c, a
+	ld	e, a
 	inc	hl
 	ld	a, (hl)
 	adc	a, -2 (ix)
-	ld	b, a
-	ld	a, (bc)
+	ld	d, a
+	ld	a, (de)
 	or	a, -1 (ix)
-	ld	(bc), a
+	ld	(de), a
 00102$:
 ;../../src/graphics.c:56: if (x0==x1 && y0==y1) break;
 	ld	a, 4 (ix)
 	sub	a, 8 (ix)
-	jr	NZ, 00105$
+	jr	NZ,00105$
 	ld	a, 5 (ix)
 	sub	a, 9 (ix)
-	jr	NZ, 00105$
+	jr	NZ,00105$
 	ld	a, 6 (ix)
 	sub	a, 10 (ix)
-	jr	NZ, 00213$
+	jr	NZ,00213$
 	ld	a, 7 (ix)
 	sub	a, 11 (ix)
 	jp	Z,00123$
 00213$:
 00105$:
 ;../../src/graphics.c:57: e2 = err;
-	ld	c, -5 (ix)
-	ld	b, -4 (ix)
+	ld	e, -5 (ix)
+	ld	d, -4 (ix)
 ;../../src/graphics.c:58: if (e2 >-dx) { err -= dy; 
 	ld	a, -7 (ix)
 	sub	a, -5 (ix)
@@ -760,26 +727,26 @@ _line::
 00214$:
 	jp	P, 00117$
 	ld	a, -5 (ix)
-	sub	a, e
+	sub	a, c
 	ld	-5 (ix), a
 	ld	a, -4 (ix)
-	sbc	a, d
+	sbc	a, b
 	ld	-4 (ix), a
 ;../../src/graphics.c:59: if (sx == 1){
 	ld	a, -8 (ix)
 	or	a, a
-	jr	Z, 00114$
+	jr	Z,00114$
 ;../../src/graphics.c:61: if (pxor != 1)
 	ld	a, -1 (ix)
 	dec	a
-	jr	Z, 00108$
+	jr	Z,00108$
 ;../../src/graphics.c:62: pxor = pxor>>1;
 	srl	-1 (ix)
 	jr	00109$
 00108$:
 ;../../src/graphics.c:64: pp+=1;
 	inc	-3 (ix)
-	jr	NZ, 00216$
+	jr	NZ,00216$
 	inc	-2 (ix)
 00216$:
 ;../../src/graphics.c:65: pxor=128;
@@ -787,7 +754,7 @@ _line::
 00109$:
 ;../../src/graphics.c:67: x0+=1;
 	inc	4 (ix)
-	jr	NZ, 00117$
+	jr	NZ,00117$
 	inc	5 (ix)
 	jr	00117$
 00114$:
@@ -800,7 +767,7 @@ _line::
 ;../../src/graphics.c:71: if (pxor != 128)
 	ld	a, -1 (ix)
 	sub	a, #0x80
-	jr	Z, 00111$
+	jr	Z,00111$
 ;../../src/graphics.c:72: pxor = pxor<<1;
 	ld	a, -1 (ix)
 	add	a, a
@@ -817,10 +784,10 @@ _line::
 	ld	-1 (ix), #0x01
 00117$:
 ;../../src/graphics.c:79: if (e2 < dy) { err += dx; pp += sy;y0+=sy1; }
-	ld	a, c
-	sub	a, e
-	ld	a, b
-	sbc	a, d
+	ld	a, e
+	sub	a, c
+	ld	a, d
+	sbc	a, b
 	jp	PO, 00219$
 	xor	a, #0x80
 00219$:
@@ -916,7 +883,7 @@ _number::
 	ld	sp, hl
 ;../../src/graphics.c:96: if (x<0){
 	bit	7, 5 (ix)
-	jr	Z, 00113$
+	jr	Z,00113$
 ;../../src/graphics.c:97: x=0-x;
 	xor	a, a
 	sub	a, 4 (ix)
@@ -974,7 +941,7 @@ _number::
 	call	__divsint
 	pop	af
 	pop	af
-	ex	de, hl
+	ex	de,hl
 	pop	bc
 	ld	4 (ix), e
 	ld	5 (ix), d
@@ -990,7 +957,7 @@ _number::
 00108$:
 ;../../src/graphics.c:106: for(;i>=0; i--){
 	bit	7, b
-	jr	NZ, 00110$
+	jr	NZ,00110$
 ;../../src/graphics.c:107: printc(out[i]);
 	ld	l, -4 (ix)
 	ld	h, -3 (ix)
@@ -1059,7 +1026,7 @@ _numberslong::
 	ld	(hl), a
 ;../../src/graphics.c:117: i+=1;
 	inc	-2 (ix)
-	jr	NZ, 00132$
+	jr	NZ,00132$
 	inc	-1 (ix)
 00132$:
 ;../../src/graphics.c:118: } while((x /= 10) > 0);
@@ -1088,7 +1055,7 @@ _numberslong::
 	or	a, e
 	or	a, b
 	or	a, c
-	jr	NZ, 00101$
+	jr	NZ,00101$
 ;../../src/graphics.c:119: i--;
 	ld	c, -2 (ix)
 	ld	b, -1 (ix)
@@ -1096,7 +1063,7 @@ _numberslong::
 00106$:
 ;../../src/graphics.c:120: for(;i>=0; i--){
 	bit	7, b
-	jr	NZ, 00108$
+	jr	NZ,00108$
 ;../../src/graphics.c:121: printc(out[i]);
 	ld	l, -6 (ix)
 	ld	h, -5 (ix)
@@ -1116,651 +1083,42 @@ _numberslong::
 	ld	sp, ix
 	pop	ix
 	ret
-;../../src/graphics.c:149: void wait128(unsigned char x){ // Wait for amount of time (1/128th of sec)
-;	---------------------------------
-; Function wait128
-; ---------------------------------
-_wait128::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-;../../src/graphics.c:166: __endasm;
-	di
-	ld	a,#0x46 ;128 hz
-	out	(#0x30),a
-	ld	a,#0x00 ; no loop, no interrupt
-	out	(#0x31),a
-	ld	a,4(ix)
-	out	(#0x32),a
-	    wait2:
-	in	a,(4)
-	bit	5,a ;bit 5 tells if timer 1
-	jr	z,wait2 ;is done
-	xor	a
-	out	(#0x30),a ;Turn off the timer.
-	out	(#0x31),a
-;../../src/graphics.c:167: }
-	pop	ix
-	ret
-;../../src/graphics.c:171: void swap(){
+;../../src/graphics.c:170: void swap(){
 ;	---------------------------------
 ; Function swap
 ; ---------------------------------
 _swap::
-;../../src/graphics.c:172: bcall(0x486A);
+;../../src/graphics.c:171: bcall(0x486A);
 	rst	40 
 	.dw 0x486A 
-;../../src/graphics.c:239: }
+;../../src/graphics.c:174: }
 	ret
-;../../src/graphics.c:241: int getKeyId(){
+;../../src/graphics.c:176: int getKeyId(){
 ;	---------------------------------
 ; Function getKeyId
 ; ---------------------------------
 _getKeyId::
-;../../src/graphics.c:242: bcall(0x4015);
+;../../src/graphics.c:177: bcall(0x4015);
 	rst	40 
 	.dw 0x4015 
-;../../src/graphics.c:243: return (int)(*((char*)(0x843F)));}
+;../../src/graphics.c:178: return (int)(*((char*)(0x843F)));}
 	ld	hl, #0x843f
 	ld	l, (hl)
 	ld	h, #0x00
 	ret
-;../../src/graphics.c:249: void init_graphics(){
+;../../src/graphics.c:184: void init_graphics(){
 ;	---------------------------------
 ; Function init_graphics
 ; ---------------------------------
 _init_graphics::
-;../../src/graphics.c:250: buff = (char*)(SCREEN_BUFFER);
+;../../src/graphics.c:185: buff = (char*)(SCREEN_BUFFER);
 	ld	hl, #_buff
 	ld	(hl), #0x40
 	inc	hl
 	ld	(hl), #0x93
-;../../src/graphics.c:251: }
+;../../src/graphics.c:186: }
 	ret
-;../../src/graphics.c:272: void resetRandomSeed(){
-;	---------------------------------
-; Function resetRandomSeed
-; ---------------------------------
-_resetRandomSeed::
-;../../src/graphics.c:273: bcall(0x4B7F);
-	rst	40 
-	.dw 0x4B7F 
-;../../src/graphics.c:274: }
-	ret
-;../../src/graphics.c:275: int randomInt(){
-;	---------------------------------
-; Function randomInt
-; ---------------------------------
-_randomInt::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-	push	af
-;../../src/graphics.c:276: int x = 0;
-	ld	hl, #0x0000
-	ex	(sp), hl
-;../../src/graphics.c:277: bcall(0x4B79);
-	rst	40 
-	.dw 0x4B79 
-;../../src/graphics.c:278: assignAToVar(&x);
-	ld	hl, #0
-	add	hl, sp
-	push	hl
-	call	_assignAToVar
-	pop	af
-;../../src/graphics.c:279: return x;
-	ld	l, -2 (ix)
-	ld	h, -1 (ix)
-;../../src/graphics.c:280: }
-	ld	sp, ix
-	pop	ix
-	ret
-;../../src/menu.c:4: void menu_putstr(char* str, int ind){
-;	---------------------------------
-; Function menu_putstr
-; ---------------------------------
-_menu_putstr::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-;../../src/menu.c:5: newline();
-	call	_newline
-;../../src/menu.c:6: number(ind);
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
-	push	hl
-	call	_number
-;../../src/menu.c:7: print(". ");
-	ld	hl, #___str_0
-	ex	(sp),hl
-	call	_print
-	pop	af
-;../../src/menu.c:8: print(str);
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
-	call	_print
-	pop	af
-;../../src/menu.c:9: }
-	pop	ix
-	ret
-___str_0:
-	.ascii ". "
-	.db 0x00
-;../../src/menu.c:10: int menu_loop(){
-;	---------------------------------
-; Function menu_loop
-; ---------------------------------
-_menu_loop::
-;../../src/menu.c:11: int k = getKey()-0x8E;
-	call	_getKey
-	ex	de, hl
-	ld	a, e
-	add	a, #0x72
-	ld	e, a
-	ld	a, d
-	adc	a, #0xff
-	ld	d, a
-;../../src/menu.c:12: if (k < 0){
-	bit	7, d
-	jr	Z, 00104$
-;../../src/menu.c:13: k = 1;
-	ld	de, #0x0001
-	jr	00105$
-00104$:
-;../../src/menu.c:14: }else if (k > 30){
-	ld	a, #0x1e
-	cp	a, e
-	ld	a, #0x00
-	sbc	a, d
-	jp	PO, 00118$
-	xor	a, #0x80
-00118$:
-	jp	P, 00105$
-;../../src/menu.c:15: k = 1;
-	ld	de, #0x0001
-00105$:
-;../../src/menu.c:17: resetcursor();
-	push	de
-	call	_resetcursor
-	pop	de
-;../../src/menu.c:18: return k;
-	ex	de, hl
-;../../src/menu.c:19: }
-	ret
-;main.c:58: void drawblock(int x, int y){
-;	---------------------------------
-; Function drawblock
-; ---------------------------------
-_drawblock::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-	push	af
-	dec	sp
-;main.c:59: int xa = (y*BLOCKSIZE*12)+ (x / 2);
-	ld	c, 6 (ix)
-	ld	b, 7 (ix)
-	ld	l, c
-	ld	h, b
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	ex	de, hl
-	ld	c, 4 (ix)
-	ld	b, 5 (ix)
-	bit	7, b
-	jr	Z, 00107$
-	inc	bc
-00107$:
-	sra	b
-	rr	c
-	ex	de,hl
-	add	hl, bc
-;main.c:65: char st = x%2==0?0xF0:0x0F;
-	push	hl
-	ld	hl, #0x0002
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
-	call	__modsint
-	pop	af
-	pop	af
-	ex	de, hl
-	pop	bc
-	ld	a, d
-	or	a, e
-	jr	NZ, 00108$
-	ld	de, #0x00f0
-	jr	00109$
-00108$:
-	ld	de, #0x000f
-00109$:
-	ld	-3 (ix), e
-;main.c:67: for (int i = 0; i < BLOCKSIZE; i++)
-	xor	a, a
-	ld	-2 (ix), a
-	ld	-1 (ix), a
-00103$:
-	ld	a, -2 (ix)
-	sub	a, #0x04
-	ld	a, -1 (ix)
-	rla
-	ccf
-	rra
-	sbc	a, #0x80
-	jr	NC, 00105$
-;main.c:68: buff[(i*12) + xa] |= st;
-	ld	e, -2 (ix)
-	ld	d, -1 (ix)
-	ld	l, e
-	ld	h, d
-	add	hl, hl
-	add	hl, de
-	add	hl, hl
-	add	hl, hl
-	add	hl, bc
-	ex	de, hl
-	ld	hl, #_buff
-	ld	a, (hl)
-	add	a, e
-	ld	e, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, d
-	ld	d, a
-	ld	a, (de)
-	or	a, -3 (ix)
-	ld	(de), a
-;main.c:67: for (int i = 0; i < BLOCKSIZE; i++)
-	inc	-2 (ix)
-	jr	NZ, 00103$
-	inc	-1 (ix)
-	jr	00103$
-00105$:
-;main.c:71: }
-	ld	sp, ix
-	pop	ix
-	ret
-;main.c:72: void drawapple(int x, int y){
-;	---------------------------------
-; Function drawapple
-; ---------------------------------
-_drawapple::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-	push	af
-	push	af
-;main.c:73: int xa = (y*BLOCKSIZE*12)+ (x / 2);
-	ld	c, 6 (ix)
-	ld	b, 7 (ix)
-	ld	l, c
-	ld	h, b
-	add	hl, hl
-	add	hl, bc
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	ex	de, hl
-	ld	c, 4 (ix)
-	ld	b, 5 (ix)
-	bit	7, b
-	jr	Z, 00103$
-	inc	bc
-00103$:
-	sra	b
-	rr	c
-	ex	de,hl
-	add	hl, bc
-	ex	(sp), hl
-;main.c:75: char st = x%2==0?0xF0:0x0F;
-	ld	hl, #0x0002
-	push	hl
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
-	call	__modsint
-	pop	af
-	pop	af
-	ex	de, hl
-	ld	a, d
-	or	a, e
-	jr	NZ, 00104$
-	ld	bc, #0x00f0
-	jr	00105$
-00104$:
-	ld	bc, #0x000f
-00105$:
-	ld	-2 (ix), c
-;main.c:76: char md1 = x%2==0?0xB0:0x0B;
-	ld	a, d
-	or	a, e
-	jr	NZ, 00106$
-	ld	bc, #0x00b0
-	jr	00107$
-00106$:
-	ld	bc, #0x000b
-00107$:
-	ld	-1 (ix), c
-;main.c:77: char md2 = x%2==0?0x90:0x09;
-	ld	a, d
-	or	a, e
-	jr	NZ, 00108$
-	ld	bc, #0x0090
-	jr	00109$
-00108$:
-	ld	bc, #0x0009
-00109$:
-;main.c:78: buff[xa] = st;
-	ld	hl, #_buff
-	ld	a, (hl)
-	add	a, -4 (ix)
-	ld	e, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, -3 (ix)
-	ld	d, a
-	ld	a, -2 (ix)
-	ld	(de), a
-;main.c:79: buff[xa+12] = md1;
-	ld	a, -4 (ix)
-	add	a, #0x0c
-	ld	b, a
-	ld	a, -3 (ix)
-	adc	a, #0x00
-	ld	d, a
-	dec	hl
-	ld	a, (hl)
-	add	a, b
-	ld	e, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, d
-	ld	d, a
-	ld	a, -1 (ix)
-	ld	(de), a
-;main.c:80: buff[xa+24] = md2;
-	ld	a, -4 (ix)
-	add	a, #0x18
-	ld	b, a
-	ld	a, -3 (ix)
-	adc	a, #0x00
-	ld	d, a
-	dec	hl
-	ld	a, (hl)
-	add	a, b
-	ld	e, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, d
-	ld	d, a
-	ld	a, c
-	ld	(de), a
-;main.c:81: buff[xa+36] = st;
-	ld	a, -4 (ix)
-	add	a, #0x24
-	ld	c, a
-	ld	a, -3 (ix)
-	adc	a, #0x00
-	ld	b, a
-	dec	hl
-	ld	a, (hl)
-	add	a, c
-	ld	c, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, b
-	ld	b, a
-	ld	a, -2 (ix)
-	ld	(bc), a
-;main.c:97: }
-	ld	sp, ix
-	pop	ix
-	ret
-;main.c:99: void move(int *x, int *y, char dir){
-;	---------------------------------
-; Function move
-; ---------------------------------
-_move::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-;main.c:101: *x+=1;
-	ld	c, 4 (ix)
-	ld	b, 5 (ix)
-;main.c:100: if (dir == 0){
-	ld	a, 8 (ix)
-	or	a, a
-	jr	NZ, 00110$
-;main.c:101: *x+=1;
-	ld	l, c
-	ld	h, b
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	inc	de
-	ld	a, e
-	ld	(bc), a
-	inc	bc
-	ld	a, d
-	ld	(bc), a
-	jr	00112$
-00110$:
-;main.c:102: }else if (dir == 1){
-	ld	a, 8 (ix)
-	dec	a
-	jr	NZ, 00107$
-;main.c:103: *x-=1;
-	ld	l, c
-	ld	h, b
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	dec	de
-	ld	a, e
-	ld	(bc), a
-	inc	bc
-	ld	a, d
-	ld	(bc), a
-	jr	00112$
-00107$:
-;main.c:105: *y-=1;
-	ld	c, 6 (ix)
-	ld	b, 7 (ix)
-;main.c:104: }else if (dir == 2){
-	ld	a, 8 (ix)
-	sub	a, #0x02
-	jr	NZ, 00104$
-;main.c:105: *y-=1;
-	ld	l, c
-	ld	h, b
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	dec	de
-	ld	a, e
-	ld	(bc), a
-	inc	bc
-	ld	a, d
-	ld	(bc), a
-	jr	00112$
-00104$:
-;main.c:106: }else if (dir == 3){
-	ld	a, 8 (ix)
-	sub	a, #0x03
-	jr	NZ, 00112$
-;main.c:107: *y+=1;
-	ld	l, c
-	ld	h, b
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	inc	de
-	ld	a, e
-	ld	(bc), a
-	inc	bc
-	ld	a, d
-	ld	(bc), a
-00112$:
-;main.c:109: }
-	pop	ix
-	ret
-;main.c:110: bool checkCol(int x, int y){
-;	---------------------------------
-; Function checkCol
-; ---------------------------------
-_checkCol::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-	push	af
-;main.c:111: for (int i = 0; i < bklen; i++){
-	ld	bc, #0x0000
-00106$:
-	ld	a, c
-	ld	hl, #_bklen
-	sub	a, (hl)
-	ld	a, b
-	inc	hl
-	sbc	a, (hl)
-	jp	PO, 00130$
-	xor	a, #0x80
-00130$:
-	jp	P, 00104$
-;main.c:112: if (bx[i] == x && by[i] == y)
-	inc	sp
-	inc	sp
-	push	bc
-	sla	-2 (ix)
-	rl	-1 (ix)
-	ld	hl, #_bx
-	ld	a, (hl)
-	add	a, -2 (ix)
-	ld	e, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, -1 (ix)
-	ld	d, a
-	ex	de,hl
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	cp	a, a
-	sbc	hl, de
-	jr	NZ, 00107$
-	ld	hl, #_by
-	ld	a, (hl)
-	add	a, -2 (ix)
-	ld	e, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, -1 (ix)
-	ld	d, a
-	ex	de,hl
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	ld	l, 6 (ix)
-	ld	h, 7 (ix)
-	cp	a, a
-	sbc	hl, de
-	jr	NZ, 00107$
-;main.c:113: return true;
-	ld	l, #0x01
-	jr	00108$
-00107$:
-;main.c:111: for (int i = 0; i < bklen; i++){
-	inc	bc
-	jr	00106$
-00104$:
-;main.c:115: return false;
-	ld	l, #0x00
-00108$:
-;main.c:116: }
-	ld	sp, ix
-	pop	ix
-	ret
-;main.c:117: void makeApple(){
-;	---------------------------------
-; Function makeApple
-; ---------------------------------
-_makeApple::
-;main.c:118: do{
-00101$:
-;main.c:119: ax = randomInt()%XLEN;
-	call	_randomInt
-	ex	de, hl
-	ld	hl, #0x0018
-	push	hl
-	push	de
-	call	__modsint
-	pop	af
-	pop	af
-	ex	de, hl
-	ld	hl, #_ax
-	ld	(hl), e
-	inc	hl
-	ld	(hl), d
-;main.c:120: ay = randomInt()%YLEN;
-	call	_randomInt
-	ex	de, hl
-	ld	hl, #0x0010
-	push	hl
-	push	de
-	call	__modsint
-	pop	af
-	pop	af
-	ex	de, hl
-	ld	hl, #_ay
-	ld	(hl), e
-	inc	hl
-	ld	(hl), d
-;main.c:122: while (checkCol(ax, ay) | (ax == hx && ay == hy));
-	ld	hl, (_ay)
-	push	hl
-	ld	hl, (_ax)
-	push	hl
-	call	_checkCol
-	pop	af
-	pop	af
-	ld	c, l
-	ld	a, (#_ax)
-	ld	hl, #_hx
-	sub	a, (hl)
-	jr	NZ, 00106$
-	ld	a, (#_ax + 1)
-	ld	hl, #_hx + 1
-	sub	a, (hl)
-	jr	NZ, 00106$
-	ld	a, (#_ay)
-	ld	hl, #_hy
-	sub	a, (hl)
-	jr	NZ, 00121$
-	ld	a, (#_ay + 1)
-	ld	hl, #_hy + 1
-	sub	a, (hl)
-	jr	Z, 00107$
-00121$:
-00106$:
-	xor	a, a
-	jr	00108$
-00107$:
-	ld	a, #0x01
-00108$:
-	or	a, c
-	or	a, a
-	jr	NZ, 00101$
-;main.c:123: }
-	ret
-;main.c:125: void main() {
+;main.c:51: void main() {
 ;	---------------------------------
 ; Function main
 ; ---------------------------------
@@ -1768,598 +1126,1175 @@ _main::
 	push	ix
 	ld	ix,#0
 	add	ix,sp
-	ld	hl, #-8
+	ld	hl, #-84
 	add	hl, sp
 	ld	sp, hl
-;main.c:126: bool update = true;
-	ld	-8 (ix), #0x01
-;main.c:129: makeApple();
-	call	_makeApple
-;main.c:130: clearscreen();
+;main.c:52: int px = 2;
+	ld	-14 (ix), #0x02
+	xor	a, a
+	ld	-13 (ix), a
+;main.c:53: int py = 13;
+	ld	-12 (ix), #0x0d
+	xor	a, a
+	ld	-11 (ix), a
+;main.c:54: int rot = 0;
+	xor	a, a
+	ld	-10 (ix), a
+	ld	-9 (ix), a
+;main.c:65: char map[] = {
+	ld	hl, #0
+	add	hl, sp
+	ld	-36 (ix), l
+	ld	-35 (ix), h
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x01
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x02
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x03
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x04
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x05
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x06
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x07
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x08
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x09
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x0a
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x0b
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x0c
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x0d
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x0e
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x0f
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x10
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x11
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x12
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x13
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x14
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x15
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x16
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x17
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x18
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x19
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x1a
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x1b
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x1c
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x1d
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x1e
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x1f
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x20
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x21
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x22
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x23
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x24
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x25
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x26
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x27
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x28
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x29
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2a
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2b
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2c
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x01
+	ld	a, -36 (ix)
+	add	a, #0x2d
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2e
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+	ld	a, -36 (ix)
+	add	a, #0x2f
+	ld	-2 (ix), a
+	ld	a, -35 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), #0x00
+;main.c:82: clearscreen();
 	call	_clearscreen
-;main.c:135: print("Select difficulty:");
-	ld	hl, #___str_1
-	push	hl
-	call	_print
-;main.c:136: menu_putstr("Easy", 1);
-	ld	hl, #0x0001
-	ex	(sp),hl
-	ld	hl, #___str_2
-	push	hl
-	call	_menu_putstr
-	pop	af
-;main.c:137: menu_putstr("Easyish", 2);
-	ld	hl, #0x0002
-	ex	(sp),hl
-	ld	hl, #___str_3
-	push	hl
-	call	_menu_putstr
-	pop	af
-;main.c:138: menu_putstr("Medium", 3);
-	ld	hl, #0x0003
-	ex	(sp),hl
-	ld	hl, #___str_4
-	push	hl
-	call	_menu_putstr
-	pop	af
-;main.c:139: menu_putstr("Mediumish", 4);
-	ld	hl, #0x0004
-	ex	(sp),hl
-	ld	hl, #___str_5
-	push	hl
-	call	_menu_putstr
-	pop	af
-;main.c:140: menu_putstr("Hard", 5);
-	ld	hl, #0x0005
-	ex	(sp),hl
-	ld	hl, #___str_6
-	push	hl
-	call	_menu_putstr
-	pop	af
-;main.c:141: menu_putstr("Kill me", 6);
-	ld	hl, #0x0006
-	ex	(sp),hl
-	ld	hl, #___str_7
-	push	hl
-	call	_menu_putstr
-	pop	af
-;main.c:142: menu_putstr("Im already dead", 7);
-	ld	hl, #0x0007
-	ex	(sp),hl
-	ld	hl, #___str_8
-	push	hl
-	call	_menu_putstr
-	pop	af
-	pop	af
-;main.c:143: hardness=menu_loop();
-	call	_menu_loop
-	ex	de, hl
-	ld	hl, #_hardness
-	ld	(hl), e
-	inc	hl
-	ld	(hl), d
-;main.c:145: bklen = 0;
-	ld	hl, #_bklen
-	ld	(hl), #0x00
-	inc	hl
-	ld	(hl), #0x00
-;main.c:146: hx = XLEN/2; hy = YLEN/2;
-	ld	hl, #_hx
-	ld	(hl), #0x0c
-	inc	hl
-	ld	(hl), #0x00
-	ld	hl, #_hy
-	ld	(hl), #0x08
-	inc	hl
-	ld	(hl), #0x00
-;main.c:147: bx = (int*) ( VARBIN );
-	ld	hl, #_bx
-	ld	(hl), #0x72
-	inc	hl
-	ld	(hl), #0x98
-;main.c:148: by = (int*) ( VARBIN+LENGTH_BYTES );
-	ld	hl, #_by
-	ld	(hl), #0x3a
-	inc	hl
-	ld	(hl), #0x99
-;main.c:154: char dir = 0;
-	ld	-7 (ix), #0
-;main.c:157: init_graphics();
+;main.c:83: init_graphics();
 	call	_init_graphics
-;main.c:161: while (true){
-00139$:
-;main.c:167: int key = getKeyId();
+;main.c:106: bool update = true;
+	ld	-34 (ix), #0x01
+;main.c:107: while (true){
+00151$:
+;main.c:109: int key = getKeyId();
 	call	_getKeyId
-	ex	de, hl
-;main.c:168: if (key != 0){
-	ld	a, d
-	or	a, e
-	jr	Z, 00116$
-;main.c:169: if (key == 0x0F){
-	ld	a, e
-	sub	a, #0x0f
-	or	a, d
-	jp	Z,00150$
-;main.c:172: else if (key == 1){ // down
-	ld	a, e
-	dec	a
-	or	a, d
-	jr	NZ, 00110$
-;main.c:173: dir=3;
-	ld	-7 (ix), #0x03
-	jr	00116$
-00110$:
-;main.c:176: else if (key == 4){ // up
-	ld	a, e
-	sub	a, #0x04
-	or	a, d
-	jr	NZ, 00107$
-;main.c:177: dir=2;
-	ld	-7 (ix), #0x02
-	jr	00116$
-00107$:
-;main.c:180: else if (key == 2){ // left
-	ld	a, e
-	sub	a, #0x02
-	or	a, d
-	jr	NZ, 00104$
-;main.c:181: dir=1;
-	ld	-7 (ix), #0x01
-	jr	00116$
-00104$:
-;main.c:183: else if (key == 3){ // right
-	ld	a, e
-	sub	a, #0x03
-	or	a, d
-	jr	NZ, 00116$
-;main.c:184: dir=0;
-	ld	-7 (ix), #0
-00116$:
-;main.c:191: if (update){
-	ld	a, -8 (ix)
-	or	a, a
-	jp	Z, 00135$
-;main.c:194: for(int ii = bklen -1; ii > 0; ii--)
-	ld	bc, (_bklen)
-	dec	bc
-00142$:
-	xor	a, a
-	cp	a, c
-	sbc	a, b
-	jp	PO, 00277$
-	xor	a, #0x80
-00277$:
-	jp	P, 00117$
-;main.c:196: bx[ii] = bx[ii-1];
-	ld	-6 (ix), c
-	ld	-5 (ix), b
-	sla	-6 (ix)
-	rl	-5 (ix)
-	ld	hl, #_bx
-	ld	a, (hl)
-	add	a, -6 (ix)
-	ld	-4 (ix), a
-	inc	hl
-	ld	a, (hl)
-	adc	a, -5 (ix)
-	ld	-3 (ix), a
-	ld	a, c
-	add	a, #0xff
-	ld	-2 (ix), a
-	ld	a, b
-	adc	a, #0xff
-	ld	-1 (ix), a
-	ld	l, -2 (ix)
-	ld	h, -1 (ix)
-	add	hl, hl
-	ex	de,hl
-	ld	hl, #_bx
-	ld	a, (hl)
-	add	a, e
-	ld	c, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, d
-	ld	b, a
-	ld	l, c
-	ld	h, b
-	ld	c, (hl)
-	inc	hl
-	ld	b, (hl)
-	ld	l, -4 (ix)
-	ld	h, -3 (ix)
-	ld	(hl), c
-	inc	hl
-	ld	(hl), b
-;main.c:197: by[ii] = by[ii-1];
-	ld	hl, #_by
-	ld	a, (hl)
-	add	a, -6 (ix)
-	ld	c, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, -5 (ix)
-	ld	b, a
-	dec	hl
-	ld	a, (hl)
-	add	a, e
-	ld	e, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, d
-	ld	d, a
-	ex	de,hl
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	ld	a, e
-	ld	(bc), a
-	inc	bc
-	ld	a, d
-	ld	(bc), a
-;main.c:194: for(int ii = bklen -1; ii > 0; ii--)
-	ld	c, -2 (ix)
-	ld	b, -1 (ix)
-	jr	00142$
-00117$:
-;main.c:199: bx[0] = hx;
-	ld	bc, (_bx)
-	ld	hl, #_hx
-	ld	a, (hl)
-	ld	(bc), a
-	inc	bc
-	inc	hl
-	ld	a, (hl)
-	ld	(bc), a
-;main.c:200: by[0] = hy;
-	ld	bc, (_by)
-	ld	hl, #_hy
-	ld	a, (hl)
-	ld	(bc), a
-	inc	bc
-	inc	hl
-	ld	a, (hl)
-	ld	(bc), a
-;main.c:201: move(&hx, &hy, dir);
-	ld	a, -7 (ix)
-	push	af
-	inc	sp
-	ld	hl, #_hy
-	push	hl
-	ld	hl, #_hx
-	push	hl
-	call	_move
-	pop	af
-	pop	af
-	inc	sp
-;main.c:203: if (hx >= XLEN){
-	ld	hl, #_hx
-	ld	a, (hl)
-	sub	a, #0x18
-	inc	hl
-	ld	a, (hl)
-	rla
-	ccf
-	rra
-	sbc	a, #0x80
-	jr	C, 00121$
-;main.c:204: hx = 0;
-	dec	hl
-	ld	(hl), #0x00
-	inc	hl
-	ld	(hl), #0x00
-	jr	00122$
-00121$:
-;main.c:205: }else if (hx < 0){
-	ld	hl, #_hx + 1
-	bit	7, (hl)
-	jr	Z, 00122$
-;main.c:206: hx = XLEN-1;
-	dec	hl
-	ld	(hl), #0x17
-	inc	hl
-	ld	(hl), #0x00
-00122$:
-;main.c:208: if (hy >= YLEN){
-	ld	hl, #_hy
-	ld	a, (hl)
-	sub	a, #0x10
-	inc	hl
-	ld	a, (hl)
-	rla
-	ccf
-	rra
-	sbc	a, #0x80
-	jr	C, 00126$
-;main.c:209: hy = 0;
-	dec	hl
-	ld	(hl), #0x00
-	inc	hl
-	ld	(hl), #0x00
-	jr	00127$
-00126$:
-;main.c:210: }else if (hy < 0){
-	ld	hl, #_hy + 1
-	bit	7, (hl)
-	jr	Z, 00127$
-;main.c:211: hy = YLEN;
-	dec	hl
-	ld	(hl), #0x10
-	inc	hl
-	ld	(hl), #0x00
-00127$:
-;main.c:215: if (checkCol(ax, ay) | (ax == hx && ay == hy)){
-	ld	hl, (_ay)
-	push	hl
-	ld	hl, (_ax)
-	push	hl
-	call	_checkCol
-	pop	af
-	pop	af
-	ld	c, l
-	ld	a, (#_ax)
-	ld	hl, #_hx
-	sub	a, (hl)
-	jr	NZ, 00152$
-	ld	a, (#_ax + 1)
-	ld	hl, #_hx + 1
-	sub	a, (hl)
-	jr	NZ, 00152$
-	ld	a, (#_ay)
-	ld	hl, #_hy
-	sub	a, (hl)
-	jr	NZ, 00281$
-	ld	a, (#_ay + 1)
-	ld	hl, #_hy + 1
-	sub	a, (hl)
-	jr	Z, 00153$
-00281$:
-00152$:
-	xor	a, a
-	jr	00154$
-00153$:
-	ld	a, #0x01
-00154$:
-	or	a, c
-	or	a, a
-	jp	Z, 00130$
-;main.c:216: for (int iii = bklen-1; iii < bklen+hardness; iii++){
-	ld	de, (_bklen)
-	dec	de
-00145$:
-	ld	a, (#_bklen)
-	ld	hl, #_hardness
-	add	a, (hl)
-	ld	c, a
-	ld	a, (#_bklen + 1)
-	ld	hl, #_hardness + 1
-	adc	a, (hl)
-	ld	b, a
-	ld	a, e
-	sub	a, c
-	ld	a, d
-	sbc	a, b
-	jp	PO, 00282$
-	xor	a, #0x80
-00282$:
-	jp	P, 00128$
-;main.c:217: bx[iii] = bx[0];
-	ld	-4 (ix), e
-	ld	-3 (ix), d
-	sla	-4 (ix)
-	rl	-3 (ix)
-	ld	hl, #_bx
-	ld	a, (hl)
-	add	a, -4 (ix)
-	ld	-2 (ix), a
-	inc	hl
-	ld	a, (hl)
-	adc	a, -3 (ix)
-	ld	-1 (ix), a
-	ld	bc, (_bx)
-	ld	l, c
-	ld	h, b
-	ld	c, (hl)
-	inc	hl
-	ld	b, (hl)
-	ld	l, -2 (ix)
-	ld	h, -1 (ix)
-	ld	(hl), c
-	inc	hl
-	ld	(hl), b
-;main.c:218: by[iii] = by[0];
-	ld	hl, #_by
-	ld	a, (hl)
-	add	a, -4 (ix)
-	ld	-2 (ix), a
-	inc	hl
-	ld	a, (hl)
-	adc	a, -3 (ix)
-	ld	-1 (ix), a
-	ld	bc, (_by)
-	ld	l, c
-	ld	h, b
-	ld	c, (hl)
-	inc	hl
-	ld	b, (hl)
-	ld	l, -2 (ix)
-	ld	h, -1 (ix)
-	ld	(hl), c
-	inc	hl
-	ld	(hl), b
-;main.c:216: for (int iii = bklen-1; iii < bklen+hardness; iii++){
-	inc	de
-	jr	00145$
-00128$:
-;main.c:220: bklen+=hardness;
-	ld	hl, #_bklen
-	ld	(hl), c
-	inc	hl
-	ld	(hl), b
-;main.c:221: makeApple();
-	call	_makeApple
-00130$:
-;main.c:223: if (checkCol(hx, hy))
-	ld	hl, (_hy)
-	push	hl
-	ld	hl, (_hx)
-	push	hl
-	call	_checkCol
-	pop	af
-	pop	af
-	ld	a, l
-	or	a, a
-	jp	NZ, 00150$
-;main.c:230: badclr();
-	call	_badclr
-;main.c:231: drawapple(ax, ay);
-	ld	hl, (_ay)
-	push	hl
-	ld	hl, (_ax)
-	push	hl
-	call	_drawapple
-	pop	af
-	pop	af
-;main.c:232: drawblock(hx, hy);
-	ld	hl, (_hy)
-	push	hl
-	ld	hl, (_hx)
-	push	hl
-	call	_drawblock
-	pop	af
-	pop	af
-;main.c:233: for (int i = 0; i < bklen; i+=1){
-	xor	a, a
-	ld	-2 (ix), a
-	ld	-1 (ix), a
-00148$:
+	ld	-2 (ix), l
+;main.c:110: if (key != 0){
+	ld	-1 (ix), h
+	ld	a, h
+	or	a, -2 (ix)
+	jp	Z, 00119$
+;main.c:111: if (key == 0x0F){
 	ld	a, -2 (ix)
-	ld	hl, #_bklen
-	sub	a, (hl)
-	ld	a, -1 (ix)
-	inc	hl
-	sbc	a, (hl)
-	jp	PO, 00284$
-	xor	a, #0x80
-00284$:
-	jp	P, 00135$
-;main.c:234: drawblock(bx[i], by[i]);
-	ld	l, -2 (ix)
-	ld	h, -1 (ix)
-	add	hl, hl
-	ex	de,hl
-	ld	hl, #_by
-	ld	a, (hl)
-	add	a, e
-	ld	c, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, d
-	ld	b, a
+	sub	a, #0x0f
+	or	a, -1 (ix)
+	jp	Z,00152$
+;main.c:114: else if (key == 1){ // down
+	ld	a, -2 (ix)
+	dec	a
+	or	a, -1 (ix)
+	jr	NZ,00113$
+;main.c:115: py+=1;
+	inc	-12 (ix)
+	jr	NZ,00117$
+	inc	-11 (ix)
+	jr	00117$
+00113$:
+;main.c:118: else if (key == 4){ // up
+	ld	a, -2 (ix)
+	sub	a, #0x04
+	or	a, -1 (ix)
+	jr	NZ,00110$
+;main.c:119: py-=1;
+	ld	l, -12 (ix)
+	ld	h, -11 (ix)
+	dec	hl
+	ld	-12 (ix), l
+	ld	-11 (ix), h
+	jr	00117$
+00110$:
+;main.c:122: else if (key == 2){ // left
+	ld	a, -2 (ix)
+	sub	a, #0x02
+	or	a, -1 (ix)
+	jr	NZ,00107$
+;main.c:123: px-=1;
+	ld	l, -14 (ix)
+	ld	h, -13 (ix)
+	dec	hl
+	ld	-14 (ix), l
+	ld	-13 (ix), h
+	jr	00117$
+00107$:
+;main.c:125: else if (key == 3){ // right
+	ld	a, -2 (ix)
+	sub	a, #0x03
+	or	a, -1 (ix)
+	jr	NZ,00104$
+;main.c:126: px+=1;
+	inc	-14 (ix)
+	jr	NZ,00117$
+	inc	-13 (ix)
+	jr	00117$
+00104$:
+;main.c:128: else if (key == 0x0A){ // plus
+	ld	a, -2 (ix)
+	sub	a, #0x0a
+	or	a, -1 (ix)
+	jr	NZ,00117$
+;main.c:129: rot+=1;
+	inc	-10 (ix)
+	jr	NZ,00333$
+	inc	-9 (ix)
+00333$:
+00117$:
+;main.c:131: update=true;
+	ld	-34 (ix), #0x01
+00119$:
+;main.c:137: if (update){
+	bit	0, -34 (ix)
+	jp	Z, 00151$
+;main.c:138: update=false;
+	xor	a, a
+	ld	-34 (ix), a
+;main.c:139: badclr();
+	call	_badclr
+;main.c:142: int oldY = 0;
+	xor	a, a
+	ld	-33 (ix), a
+	ld	-32 (ix), a
+;main.c:143: for (int i = 0; i < v; ++i){
+	ld	c, -14 (ix)
+	ld	b, -13 (ix)
 	ld	l, c
 	ld	h, b
-	ld	c, (hl)
-	inc	hl
-	ld	b, (hl)
-	ld	hl, #_bx
-	ld	a, (hl)
-	add	a, e
-	ld	e, a
-	inc	hl
-	ld	a, (hl)
-	adc	a, d
-	ld	d, a
-	ex	de,hl
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	push	bc
-	push	de
-	call	_drawblock
-	pop	af
-	pop	af
-;main.c:233: for (int i = 0; i < bklen; i+=1){
-	inc	-2 (ix)
-	jr	NZ, 00148$
-	inc	-1 (ix)
-	jr	00148$
-00135$:
-;main.c:237: } update = !update;
-	ld	a, -8 (ix)
-	sub	a,#0x01
-	ld	a, #0x00
-	rla
+	add	hl, hl
+	add	hl, bc
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, bc
+	add	hl, hl
+	add	hl, hl
+	ld	de, #0x0032
+	add	hl, de
+	ld	-31 (ix), l
+	ld	-30 (ix), h
+	ld	c, -12 (ix)
+	ld	b, -11 (ix)
+	ld	l, c
+	ld	h, b
+	add	hl, hl
+	add	hl, bc
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, bc
+	add	hl, hl
+	add	hl, hl
+	ld	de, #0x0064
+	add	hl, de
+	ld	-29 (ix), l
+	ld	-28 (ix), h
+	xor	a, a
 	ld	-8 (ix), a
-;main.c:239: swap();
-	call	_swap
-;main.c:240: number(bklen/hardness);
-	ld	hl, (_hardness)
-	push	hl
-	ld	hl, (_bklen)
+	ld	-7 (ix), a
+00160$:
+	ld	a, -8 (ix)
+	sub	a, #0x10
+	ld	a, -7 (ix)
+	rla
+	ccf
+	rra
+	sbc	a, #0x80
+	jp	NC, 00147$
+;main.c:144: int cameraX = 2 * i*100 / v - 100;
+	ld	c, -8 (ix)
+	ld	b, -7 (ix)
+	ld	l, c
+	ld	h, b
+	add	hl, hl
+	add	hl, bc
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, bc
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	ld	bc, #0x0010
+	push	bc
 	push	hl
 	call	__divsint
 	pop	af
-	ex	(sp),hl
-	call	_number
 	pop	af
-;main.c:241: resetcursor();
-	call	_resetcursor
-;main.c:242: if (bklen<30)
-	ld	hl, #_bklen
-	ld	a, (hl)
-	sub	a, #0x1e
-	inc	hl
-	ld	a, (hl)
+	ld	c, l
+	ld	b, h
+	ld	a, c
+	add	a, #0x9c
+	ld	-16 (ix), a
+	ld	a, b
+	adc	a, #0xff
+	ld	-15 (ix), a
+;main.c:145: int rx = ((px*100))+50;
+	ld	a, -31 (ix)
+	ld	-6 (ix), a
+	ld	a, -30 (ix)
+	ld	-5 (ix), a
+;main.c:146: int ry = (py*100)+100;
+	ld	a, -29 (ix)
+	ld	-2 (ix), a
+	ld	a, -28 (ix)
+	ld	-1 (ix), a
+;main.c:150: int rayDirY = cameraX/2;
+	ld	a, -16 (ix)
+	ld	-4 (ix), a
+	ld	a, -15 (ix)
+	ld	-3 (ix), a
+	bit	7, -15 (ix)
+	jr	Z,00164$
+	ld	a, -16 (ix)
+	add	a, #0x01
+	ld	-4 (ix), a
+	ld	a, -15 (ix)
+	adc	a, #0x00
+	ld	-3 (ix), a
+00164$:
+	ld	c, -4 (ix)
+	ld	b, -3 (ix)
+	sra	b
+	rr	c
+;main.c:151: int toy = 0;
+	xor	a, a
+	ld	-27 (ix), a
+	ld	-26 (ix), a
+;main.c:152: for (int yy = 0; yy < 64; ++yy){
+	xor	a, a
+	ld	-25 (ix), a
+	ld	-24 (ix), a
+	ld	e, c
+	ld	d, b
+	inc	de
+	ld	a, b
+	rlca
+	and	a,#0x01
+	ld	-23 (ix), a
+	ld	a, -2 (ix)
+	ld	-4 (ix), a
+	ld	a, -1 (ix)
+	ld	-3 (ix), a
+	xor	a, a
+	ld	-2 (ix), a
+	ld	-1 (ix), a
+00157$:
+;main.c:183: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
+	push	de
+	ld	e, -8 (ix)
+	ld	d, -7 (ix)
+	ld	l, e
+	ld	h, d
+	add	hl, hl
+	add	hl, de
+	add	hl, hl
+	pop	de
+	ld	-22 (ix), l
+	ld	-21 (ix), h
+;main.c:152: for (int yy = 0; yy < 64; ++yy){
+	ld	a, -2 (ix)
+	sub	a, #0x40
+	ld	a, -1 (ix)
 	rla
 	ccf
 	rra
 	sbc	a, #0x80
 	jp	NC, 00139$
-;main.c:243: wait128(6-(bklen/5));
-	ld	hl, #0x0005
+;main.c:157: rot%=4;
+	push	bc
+	push	de
+	ld	hl, #0x0004
 	push	hl
-	ld	hl, (_bklen)
+	ld	l, -10 (ix)
+	ld	h, -9 (ix)
+	push	hl
+	call	__modsint
+	pop	af
+	pop	af
+	ld	-10 (ix), l
+	ld	-9 (ix), h
+	pop	de
+	pop	bc
+;main.c:159: ama = (0-ry)/100 + ((rx)/100*mapX);
+	xor	a, a
+	sub	a, -4 (ix)
+	ld	-16 (ix), a
+	ld	a, #0x00
+	sbc	a, -3 (ix)
+	ld	-15 (ix), a
+	push	bc
+	push	de
+	ld	hl, #0x0064
+	push	hl
+	ld	l, -6 (ix)
+	ld	h, -5 (ix)
 	push	hl
 	call	__divsint
 	pop	af
 	pop	af
-	ex	de, hl
-	ld	a, #0x06
-	sub	a, e
-	push	af
-	inc	sp
-	call	_wait128
-	inc	sp
-	jp	00139$
-00150$:
-;main.c:251: }
+	ld	-20 (ix), l
+	ld	-19 (ix), h
+	ld	hl, #0x0064
+	push	hl
+	ld	l, -16 (ix)
+	ld	h, -15 (ix)
+	push	hl
+;main.c:158: if (rot == 1){
+	call	__divsint
+	pop	af
+	pop	af
+	ld	-16 (ix), l
+	ld	-15 (ix), h
+	pop	de
+	pop	bc
+	ld	a, -10 (ix)
+	dec	a
+	or	a, -9 (ix)
+	jr	NZ,00127$
+;main.c:159: ama = (0-ry)/100 + ((rx)/100*mapX);
+	ld	l, -20 (ix)
+	ld	h, -19 (ix)
+	add	hl, hl
+	add	hl, hl
+	ld	a, l
+	add	a, -16 (ix)
+	ld	l, a
+	ld	a, h
+	adc	a, -15 (ix)
+	ld	h, a
+	jp	00128$
+00127$:
+;main.c:163: ama= (0-rx)/100 + ((0-ry)/100*mapX);
+	xor	a, a
+	sub	a, -6 (ix)
+	ld	-18 (ix), a
+	ld	a, #0x00
+	sbc	a, -5 (ix)
+	ld	-17 (ix), a
+	push	bc
+	push	de
+	ld	hl, #0x0064
+	push	hl
+	ld	l, -18 (ix)
+	ld	h, -17 (ix)
+	push	hl
+;main.c:160: }else if (rot == 2){
+	call	__divsint
+	pop	af
+	pop	af
+	ld	-18 (ix), l
+	ld	-17 (ix), h
+	pop	de
+	pop	bc
+	ld	a, -10 (ix)
+	sub	a, #0x02
+	or	a, -9 (ix)
+	jr	NZ,00124$
+;main.c:163: ama= (0-rx)/100 + ((0-ry)/100*mapX);
+	ld	l, -16 (ix)
+	ld	h, -15 (ix)
+	add	hl, hl
+	add	hl, hl
+	ld	a, l
+	add	a, -18 (ix)
+	ld	l, a
+	ld	a, h
+	adc	a, -17 (ix)
+	ld	h, a
+	jr	00128$
+00124$:
+;main.c:168: ama= ry/100 + ((0-rx)/100*mapX);
+	push	bc
+	push	de
+	ld	hl, #0x0064
+	push	hl
+	ld	l, -4 (ix)
+	ld	h, -3 (ix)
+	push	hl
+;main.c:164: }else if (rot == 3){
+	call	__divsint
+	pop	af
+	pop	af
+	ld	-16 (ix), l
+	ld	-15 (ix), h
+	pop	de
+	pop	bc
+	ld	a, -10 (ix)
+	sub	a, #0x03
+	or	a, -9 (ix)
+	jr	NZ,00121$
+;main.c:168: ama= ry/100 + ((0-rx)/100*mapX);
+	ld	l, -18 (ix)
+	ld	h, -17 (ix)
+	add	hl, hl
+	add	hl, hl
+	ld	a, l
+	add	a, -16 (ix)
+	ld	l, a
+	ld	a, h
+	adc	a, -15 (ix)
+	ld	h, a
+	jr	00128$
+00121$:
+;main.c:170: ama= rx/100 + ((ry)/100*mapX);
+	ld	l, -16 (ix)
+	ld	h, -15 (ix)
+	add	hl, hl
+	add	hl, hl
+	ld	a, l
+	add	a, -20 (ix)
+	ld	l, a
+	ld	a, h
+	adc	a, -19 (ix)
+	ld	h, a
+00128$:
+;main.c:179: if (rx > 0 & rx > mapX){
+	xor	a, a
+	cp	a, -6 (ix)
+	sbc	a, -5 (ix)
+	jp	PO, 00340$
+	xor	a, #0x80
+00340$:
+	rlca
+	and	a,#0x01
+	ld	-15 (ix), a
+	ld	a, #0x04
+	cp	a, -6 (ix)
+	ld	a, #0x00
+	sbc	a, -5 (ix)
+	jp	PO, 00341$
+	xor	a, #0x80
+00341$:
+	rlca
+	and	a,#0x01
+	and	a, -15 (ix)
+	or	a, a
+	jp	Z, 00165$
+;main.c:180: if (ama > 0 && ama < mapX*mapY){
+	xor	a, a
+	cp	a, l
+	sbc	a, h
+	jp	PO, 00342$
+	xor	a, #0x80
+00342$:
+	jp	P, 00165$
+	ld	a, l
+	sub	a, #0x30
+	ld	a, h
+	rla
+	ccf
+	rra
+	sbc	a, #0x80
+	jp	NC, 00165$
+;main.c:181: if(map[ama] == 1){
+	ld	a, l
+	add	a, -36 (ix)
+	ld	l, a
+	ld	a, h
+	adc	a, -35 (ix)
+	ld	h, a
+	ld	a, (hl)
+	dec	a
+	jp	NZ,00165$
+;main.c:183: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
+	ld	a, #0x40
+	sub	a, -25 (ix)
+	ld	c, a
+	ld	a, #0x00
+	sbc	a, -24 (ix)
+	ld	b, a
+;main.c:182: if (oldY == 0){
+	ld	a, -32 (ix)
+	or	a, -33 (ix)
+	jr	NZ,00188$
+;main.c:183: line(i*DMIR, yy*YMULT, i*DMIR, YMAX-(yy*YMULT));
+	push	bc
+	push	bc
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	ld	l, -25 (ix)
+	ld	h, -24 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	call	_line
+	ld	hl, #8
+	add	hl, sp
+	ld	sp, hl
+	pop	bc
+;main.c:185: for (int d = 0; d < DMIR; ++d){
+00188$:
+	ld	a, -22 (ix)
+	ld	-4 (ix), a
+	ld	a, -21 (ix)
+	ld	-3 (ix), a
+	ld	-2 (ix), c
+	ld	-1 (ix), b
+	ld	bc, #0x0000
+00154$:
+	ld	a, c
+	sub	a, #0x06
+	ld	a, b
+	rla
+	ccf
+	rra
+	sbc	a, #0x80
+	jr	NC,00139$
+;main.c:186: setpix(i*DMIR+d, yy*YMULT);
+	ld	a, -4 (ix)
+	add	a, c
+	ld	e, a
+	ld	a, -3 (ix)
+	adc	a, b
+	ld	d, a
+	push	bc
+	push	de
+	ld	l, -25 (ix)
+	ld	h, -24 (ix)
+	push	hl
+	push	de
+	call	_setpix
+	pop	af
+	pop	af
+	pop	de
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	push	hl
+	push	de
+	call	_setpix
+	pop	af
+	pop	af
+	pop	bc
+;main.c:189: toy = yy;
+	ld	a, -25 (ix)
+	ld	-27 (ix), a
+	ld	a, -24 (ix)
+	ld	-26 (ix), a
+;main.c:185: for (int d = 0; d < DMIR; ++d){
+	inc	bc
+	jr	00154$
+;main.c:196: ry-=rayDirX/2;
+00165$:
+	ld	a, -4 (ix)
+	add	a, #0xce
+	ld	-4 (ix), a
+	ld	a, -3 (ix)
+	adc	a, #0xff
+	ld	-3 (ix), a
+;main.c:197: rx+=rayDirY/2;
+	ld	l, c
+	ld	h, b
+	ld	a, -23 (ix)
+	or	a, a
+	jr	Z,00166$
+	ld	l, e
+	ld	h, d
+00166$:
+	sra	h
+	rr	l
+	ld	a, l
+	add	a, -6 (ix)
+	ld	-6 (ix), a
+	ld	a, h
+	adc	a, -5 (ix)
+	ld	-5 (ix), a
+;main.c:152: for (int yy = 0; yy < 64; ++yy){
+	inc	-2 (ix)
+	jr	NZ,00345$
+	inc	-1 (ix)
+00345$:
+	ld	a, -2 (ix)
+	ld	-25 (ix), a
+	ld	a, -1 (ix)
+	ld	-24 (ix), a
+	jp	00157$
+00139$:
+;main.c:204: if (toy  != oldY && toy != 0 && oldY != 0){
+	ld	a, -27 (ix)
+	sub	a, -33 (ix)
+	jr	NZ,00346$
+	ld	a, -26 (ix)
+	sub	a, -32 (ix)
+	jp	Z,00141$
+00346$:
+	ld	a, -26 (ix)
+	or	a, -27 (ix)
+	jp	Z, 00141$
+	ld	a, -32 (ix)
+	or	a, -33 (ix)
+	jp	Z, 00141$
+;main.c:205: line((i)*DMIR, (min(oldY, toy)+1)*YMULT, (i)*DMIR, (max(oldY, toy)-1)*YMULT);
+	ld	l, -27 (ix)
+	ld	h, -26 (ix)
+	push	hl
+	ld	l, -33 (ix)
+	ld	h, -32 (ix)
+	push	hl
+	call	_max
+	pop	af
+	pop	af
+	ex	de,hl
+	dec	de
+	push	de
+	ld	l, -27 (ix)
+	ld	h, -26 (ix)
+	push	hl
+	ld	l, -33 (ix)
+	ld	h, -32 (ix)
+	push	hl
+	call	_min
+	pop	af
+	pop	af
+	ld	c, l
+	ld	b, h
+	pop	de
+	inc	bc
+	push	de
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	push	bc
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	call	_line
+	ld	hl, #8
+	add	hl, sp
+	ld	sp, hl
+;main.c:206: line((i)*DMIR, YMAX-(min(oldY, toy)+1)*YMULT, (i)*DMIR, YMAX-(max(oldY, toy)-1)*YMULT);
+	ld	l, -27 (ix)
+	ld	h, -26 (ix)
+	push	hl
+	ld	l, -33 (ix)
+	ld	h, -32 (ix)
+	push	hl
+	call	_max
+	pop	af
+	pop	af
+	ld	-4 (ix), l
+	ld	-3 (ix), h
+	ld	a, -4 (ix)
+	add	a, #0xff
+	ld	-2 (ix), a
+	ld	a, -3 (ix)
+	adc	a, #0xff
+	ld	-1 (ix), a
+	ld	a, #0x40
+	sub	a, -2 (ix)
+	ld	-6 (ix), a
+	ld	a, #0x00
+	sbc	a, -1 (ix)
+	ld	-5 (ix), a
+	ld	l, -27 (ix)
+	ld	h, -26 (ix)
+	push	hl
+	ld	l, -33 (ix)
+	ld	h, -32 (ix)
+	push	hl
+	call	_min
+	pop	af
+	pop	af
+	ld	-2 (ix), l
+	ld	-1 (ix), h
+	ld	a, -2 (ix)
+	add	a, #0x01
+	ld	-4 (ix), a
+	ld	a, -1 (ix)
+	adc	a, #0x00
+	ld	-3 (ix), a
+	ld	a, #0x40
+	sub	a, -4 (ix)
+	ld	-2 (ix), a
+	ld	a, #0x00
+	sbc	a, -3 (ix)
+	ld	-1 (ix), a
+	ld	l, -6 (ix)
+	ld	h, -5 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	call	_line
+	ld	hl, #8
+	add	hl, sp
+	ld	sp, hl
+00141$:
+;main.c:208: if (oldY != 0 && toy ==0){
+	ld	a, -32 (ix)
+	or	a, -33 (ix)
+	jr	Z,00145$
+	ld	a, -26 (ix)
+	or	a, -27 (ix)
+	jr	NZ,00145$
+;main.c:209: line((i)*DMIR, (oldY+1)*YMULT, (i)*DMIR, YMAX-((oldY+1)*YMULT));
+	ld	a, -33 (ix)
+	add	a, #0x01
+	ld	-2 (ix), a
+	ld	a, -32 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	a, #0x40
+	sub	a, -2 (ix)
+	ld	-4 (ix), a
+	ld	a, #0x00
+	sbc	a, -1 (ix)
+	ld	-3 (ix), a
+	ld	l, -4 (ix)
+	ld	h, -3 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	push	hl
+	ld	l, -22 (ix)
+	ld	h, -21 (ix)
+	push	hl
+	call	_line
+	ld	hl, #8
+	add	hl, sp
+	ld	sp, hl
+00145$:
+;main.c:211: oldY=toy;
+	ld	a, -27 (ix)
+	ld	-33 (ix), a
+	ld	a, -26 (ix)
+	ld	-32 (ix), a
+;main.c:143: for (int i = 0; i < v; ++i){
+	inc	-8 (ix)
+	jp	NZ,00160$
+	inc	-7 (ix)
+	jp	00160$
+00147$:
+;main.c:214: swap();
+	call	_swap
+	jp	00151$
+00152$:
+;main.c:245: getKey();
+	call	_getKey
+;main.c:249: }
 	ld	sp, ix
 	pop	ix
 	ret
-___str_1:
-	.ascii "Select difficulty:"
-	.db 0x00
-___str_2:
-	.ascii "Easy"
-	.db 0x00
-___str_3:
-	.ascii "Easyish"
-	.db 0x00
-___str_4:
-	.ascii "Medium"
-	.db 0x00
-___str_5:
-	.ascii "Mediumish"
-	.db 0x00
-___str_6:
-	.ascii "Hard"
-	.db 0x00
-___str_7:
-	.ascii "Kill me"
-	.db 0x00
-___str_8:
-	.ascii "Im already dead"
-	.db 0x00
 	.area _CODE
 	.area _INITIALIZER
 __xinit____cio__current_line:

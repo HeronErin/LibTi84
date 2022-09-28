@@ -1,6 +1,6 @@
 
 
-#include <stdbool.h>
+
 
 #define USE_LINE
 #define MIN_MAX
@@ -20,8 +20,6 @@
 
 
 
-
-#include<stdio.h>
 
 
 
