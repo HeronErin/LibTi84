@@ -13,24 +13,28 @@ void nullcp(char* to, char* from){
 #endif
 #ifdef USE_GET_INFO
 int getInfo(char* name){
-	
-    nullcp((char*)(0x8478), name);
-    char br = name[0];
-    
-    bcall(0x42F1);
 	__asm
-    	ld a, b
+		ld	l, 4 (ix)
+		ld	h, 5 (ix)
+
+	__endasm;
+    // nullcp((char*)(0x8478), name);
+    // char br = name[0];
+	bcall(0x4206);
+    bcall(0x42F1);
+    __asm
+
+
+    jr c,notfound
+    ld h, e
+    ld l, d
+    jr nc,eoff
+
+    notfound:
+	ld l, #0x00
+	ld h, #0x00
+	eoff:
     __endasm;
-    
-    if (br != 0)
-    	return br;
-    else{
-    	// return 0;
-    	__asm
-			ld h, d
-			ld l, e
-    	__endasm;
-    }
 
 }
 #endif

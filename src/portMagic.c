@@ -1,3 +1,4 @@
+#pragma once
 #define _LCD_BUSY_QUICK 0x000B
 
 #ifdef USE_GET_TIME
