@@ -9,34 +9,22 @@
 ; Public variables in this module
 ;--------------------------------------------------------
 	.globl _main
-	.globl _fltA
-	.globl _FixAng
+	.globl _FXstr
+	.globl __intstr
+	.globl _FXabs
+	.globl _FXdiv
+	.globl _FXmult
 	.globl _init_graphics
 	.globl _getKeyId
 	.globl _swap
+	.globl _numberslong
+	.globl _number
 	.globl _badfill
 	.globl _badclr
 	.globl _setpix
 	.globl _pixpos
-	.globl _getSin
-	.globl ___sinBypass
-	.globl _getCos
-	.globl ___cosBypass
-	.globl _getTan
-	.globl ___tanBypass
-	.globl _absint
-	.globl _mapp
-	.globl _sins
-	.globl _cosses
-	.globl _tans
+	.globl _printc
 	.globl ___cio__current_line
-	.globl _pdy
-	.globl _pdx
-	.globl _pa
-	.globl _py
-	.globl _px
-	.globl _map
-	.globl _Vtrack
 	.globl _buff
 	.globl ___cio__buffer
 	.globl ___cio__j
@@ -52,6 +40,10 @@
 	.globl _newline
 	.globl _setPenCol
 	.globl _setPenRow
+	.globl _vputs
+	.globl _vputc
+	.globl _print
+	.globl _println
 	.globl _getKey
 	.globl _assignAToVar
 ;--------------------------------------------------------
@@ -81,34 +73,12 @@ ___cio__buffer::
 	.ds 16
 _buff::
 	.ds 2
-_Vtrack::
-	.ds 2
-_map::
-	.ds 2
-_px::
-	.ds 4
-_py::
-	.ds 4
-_pa::
-	.ds 4
-_pdx::
-	.ds 4
-_pdy::
-	.ds 4
 ;--------------------------------------------------------
 ; ram data
 ;--------------------------------------------------------
 	.area _INITIALIZED
 ___cio__current_line::
 	.ds 1
-_tans::
-	.ds 72
-_cosses::
-	.ds 36
-_sins::
-	.ds 36
-_mapp::
-	.ds 64
 ;--------------------------------------------------------
 ; absolute external ram data
 ;--------------------------------------------------------
@@ -208,6 +178,104 @@ _setPenRow::
 ;../../src/cio.c:35: }
 	pop	ix
 	ret
+;../../src/cio.c:37: void vputs(char* s) {
+;	---------------------------------
+; Function vputs
+; ---------------------------------
+_vputs::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+;../../src/cio.c:42: __endasm;
+	ld	l, 4(ix)
+	ld	h, 5(ix)
+;../../src/cio.c:43: bcall(_vputs);
+	rst	40 
+	.dw #0x4561 
+;../../src/cio.c:44: }
+	pop	ix
+	ret
+;../../src/cio.c:46: void vputc(char c) {
+;	---------------------------------
+; Function vputc
+; ---------------------------------
+_vputc::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+;../../src/cio.c:51: __endasm;
+	ld	a, 4(ix)
+;../../src/cio.c:52: bcall(_vputmap);
+	rst	40 
+	.dw #0x455E 
+;../../src/cio.c:53: }
+	pop	ix
+	ret
+;../../src/cio.c:56: void printc(char c) {
+;	---------------------------------
+; Function printc
+; ---------------------------------
+_printc::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+;../../src/cio.c:57: setPenRow(__cio__current_line);
+	ld	a, (#___cio__current_line)
+	push	af
+	inc	sp
+	call	_setPenRow
+	inc	sp
+;../../src/cio.c:58: vputc(c);
+	ld	a, 4 (ix)
+	push	af
+	inc	sp
+	call	_vputc
+	inc	sp
+;../../src/cio.c:59: }
+	pop	ix
+	ret
+;../../src/cio.c:61: void print(char* s) {
+;	---------------------------------
+; Function print
+; ---------------------------------
+_print::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+;../../src/cio.c:62: setPenRow(__cio__current_line);
+	ld	a, (#___cio__current_line)
+	push	af
+	inc	sp
+	call	_setPenRow
+	inc	sp
+;../../src/cio.c:64: vputs(s);
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+	push	hl
+	call	_vputs
+	pop	af
+;../../src/cio.c:65: }
+	pop	ix
+	ret
+;../../src/cio.c:67: void println(char* s) {
+;	---------------------------------
+; Function println
+; ---------------------------------
+_println::
+	push	ix
+;../../src/cio.c:68: print(s);
+	ld	hl, #0 + 4
+	add	hl, sp
+	ld	c, (hl)
+	inc	hl
+	ld	b, (hl)
+	push	bc
+	call	_print
+	pop	af
+;../../src/cio.c:69: newline();
+;../../src/cio.c:70: }
+	pop	ix
+	jp	_newline
 ;../../src/cio.c:95: int getKey() {
 ;	---------------------------------
 ; Function getKey
@@ -242,247 +310,6 @@ _assignAToVar::
 	inc	hl
 	ld	(hl),#0x00
 ;../../src/libti.c:17: }
-	pop	ix
-	ret
-;../../src/crapmath.c:120: int absint(int x){
-;	---------------------------------
-; Function absint
-; ---------------------------------
-_absint::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-;../../src/crapmath.c:121: if (x<0){
-	bit	7, 5 (ix)
-	jr	Z, 00102$
-;../../src/crapmath.c:122: return 0-x;
-	xor	a, a
-	sub	a, 4 (ix)
-	ld	e, a
-	ld	a, #0x00
-	sbc	a, 5 (ix)
-	ld	d, a
-	ex	de, hl
-	jr	00103$
-00102$:
-;../../src/crapmath.c:124: return x;
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-00103$:
-;../../src/crapmath.c:125: }
-	pop	ix
-	ret
-;../../src/crapmath.c:132: short int __tanBypass(int index){
-;	---------------------------------
-; Function __tanBypass
-; ---------------------------------
-___tanBypass::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-;../../src/crapmath.c:147: __endasm;
-	ld	hl, #0 + 4
-	add	hl, sp
-	ld	a, (hl)
-	inc	hl
-	ld	h, (hl)
-	ld	l, a
-	add	hl, hl
-	ld	de, #__xinit__tans
-	add	hl, de
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	ex	de, hl
-;../../src/crapmath.c:148: }
-	pop	ix
-	ret
-;../../src/crapmath.c:149: int getTan(int deg){
-;	---------------------------------
-; Function getTan
-; ---------------------------------
-_getTan::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-;../../src/crapmath.c:150: int adeg = absint(deg);
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
-	call	_absint
-	pop	af
-	ex	de, hl
-;../../src/crapmath.c:151: return (deg/adeg)*__tanBypass(adeg%360/10);
-	push	de
-	push	de
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
-	call	__divsint
-	pop	af
-	pop	af
-	ld	c, l
-	ld	b, h
-	pop	de
-	push	bc
-	ld	hl, #0x0168
-	push	hl
-	push	de
-	call	__modsint
-	pop	af
-	pop	af
-	ex	de, hl
-	ld	hl, #0x000a
-	push	hl
-	push	de
-	call	__divsint
-	pop	af
-	ex	(sp),hl
-	call	___tanBypass
-	pop	af
-	ex	de, hl
-	pop	bc
-	push	de
-	push	bc
-	call	__mulint
-	pop	af
-	pop	af
-;../../src/crapmath.c:152: }
-	pop	ix
-	ret
-;../../src/crapmath.c:156: signed char __cosBypass(int index){
-;	---------------------------------
-; Function __cosBypass
-; ---------------------------------
-___cosBypass::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-;../../src/crapmath.c:166: __endasm;
-	ld	a, #<(__xinit__cosses)
-	add	a, 4 (ix)
-	ld	c, a
-	ld	a, #>(__xinit__cosses)
-	adc	a, 5 (ix)
-	ld	l, c
-	ld	h, a
-	ld	l, (hl)
-;../../src/crapmath.c:167: }
-	pop	ix
-	ret
-;../../src/crapmath.c:168: int getCos(int deg){
-;	---------------------------------
-; Function getCos
-; ---------------------------------
-_getCos::
-	push	ix
-;../../src/crapmath.c:169: return __cosBypass(absint(deg)%360/10);
-	ld	hl, #0 + 4
-	add	hl, sp
-	ld	c, (hl)
-	inc	hl
-	ld	b, (hl)
-	push	bc
-	call	_absint
-	pop	af
-	ex	de, hl
-	ld	hl, #0x0168
-	push	hl
-	push	de
-	call	__modsint
-	pop	af
-	pop	af
-	ex	de, hl
-	ld	hl, #0x000a
-	push	hl
-	push	de
-	call	__divsint
-	pop	af
-	ex	(sp),hl
-	call	___cosBypass
-	pop	af
-	ld	a,l
-	rla
-	sbc	a, a
-	ld	h, a
-;../../src/crapmath.c:170: }
-	pop	ix
-	ret
-;../../src/crapmath.c:175: signed char __sinBypass(int index){
-;	---------------------------------
-; Function __sinBypass
-; ---------------------------------
-___sinBypass::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-;../../src/crapmath.c:185: __endasm;
-	ld	a, #<(__xinit__sins)
-	add	a, 4 (ix)
-	ld	c, a
-	ld	a, #>(__xinit__sins)
-	adc	a, 5 (ix)
-	ld	l, c
-	ld	h, a
-	ld	l, (hl)
-;../../src/crapmath.c:186: }
-	pop	ix
-	ret
-;../../src/crapmath.c:187: int getSin(int deg){
-;	---------------------------------
-; Function getSin
-; ---------------------------------
-_getSin::
-	push	ix
-	ld	ix,#0
-	add	ix,sp
-;../../src/crapmath.c:188: int adeg = absint(deg);
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
-	call	_absint
-	pop	af
-	ex	de, hl
-;../../src/crapmath.c:189: return (deg/adeg)*((int)__sinBypass(adeg%360/10));
-	push	de
-	push	de
-	ld	l, 4 (ix)
-	ld	h, 5 (ix)
-	push	hl
-	call	__divsint
-	pop	af
-	pop	af
-	ld	c, l
-	ld	b, h
-	pop	de
-	push	bc
-	ld	hl, #0x0168
-	push	hl
-	push	de
-	call	__modsint
-	pop	af
-	pop	af
-	ex	de, hl
-	ld	hl, #0x000a
-	push	hl
-	push	de
-	call	__divsint
-	pop	af
-	ex	(sp),hl
-	call	___sinBypass
-	pop	af
-	ld	a, l
-	pop	bc
-	ld	e, a
-	rla
-	sbc	a, a
-	ld	d, a
-	push	de
-	push	bc
-	call	__mulint
-	pop	af
-	pop	af
-;../../src/crapmath.c:190: }
 	pop	ix
 	ret
 ;../../src/graphics.c:15: int pixpos(int x, int y){
@@ -637,6 +464,219 @@ _badfill::
 	inc	bc
 ;../../src/graphics.c:92: }
 	jr	00103$
+;../../src/graphics.c:94: void number(int x){
+;	---------------------------------
+; Function number
+; ---------------------------------
+_number::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+	ld	hl, #-29
+	add	hl, sp
+	ld	sp, hl
+;../../src/graphics.c:96: if (x<0){
+	bit	7, 5 (ix)
+	jr	Z, 00113$
+;../../src/graphics.c:97: x=0-x;
+	xor	a, a
+	sub	a, 4 (ix)
+	ld	4 (ix), a
+	ld	a, #0x00
+	sbc	a, 5 (ix)
+	ld	5 (ix), a
+;../../src/graphics.c:98: printc('-');
+	ld	a, #0x2d
+	push	af
+	inc	sp
+	call	_printc
+	inc	sp
+;../../src/graphics.c:101: do {
+00113$:
+	ld	hl, #0
+	add	hl, sp
+	ld	-4 (ix), l
+	ld	-3 (ix), h
+	ld	bc, #0x0000
+00103$:
+;../../src/graphics.c:102: out[i]=x % 10 + '0';
+	ld	a, -4 (ix)
+	add	a, c
+	ld	e, a
+	ld	a, -3 (ix)
+	adc	a, b
+	ld	d, a
+	push	bc
+	push	de
+	ld	hl, #0x000a
+	push	hl
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+	push	hl
+	call	__modsint
+	pop	af
+	pop	af
+	ld	-2 (ix), l
+	ld	-1 (ix), h
+	pop	de
+	pop	bc
+	ld	a, -2 (ix)
+	add	a, #0x30
+	ld	(de), a
+;../../src/graphics.c:103: i+=1;
+	inc	bc
+;../../src/graphics.c:104: } while((x /= 10) > 0);
+	push	bc
+	ld	hl, #0x000a
+	push	hl
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+	push	hl
+	call	__divsint
+	pop	af
+	pop	af
+	ex	de, hl
+	pop	bc
+	ld	4 (ix), e
+	ld	5 (ix), d
+	xor	a, a
+	cp	a, e
+	sbc	a, d
+	jp	PO, 00139$
+	xor	a, #0x80
+00139$:
+	jp	M, 00103$
+;../../src/graphics.c:105: i--;
+	dec	bc
+00108$:
+;../../src/graphics.c:106: for(;i>=0; i--){
+	bit	7, b
+	jr	NZ, 00110$
+;../../src/graphics.c:107: printc(out[i]);
+	ld	l, -4 (ix)
+	ld	h, -3 (ix)
+	add	hl, bc
+	ld	a, (hl)
+	push	bc
+	push	af
+	inc	sp
+	call	_printc
+	inc	sp
+	pop	bc
+;../../src/graphics.c:106: for(;i>=0; i--){
+	dec	bc
+	jr	00108$
+00110$:
+;../../src/graphics.c:110: }
+	ld	sp, ix
+	pop	ix
+	ret
+;../../src/graphics.c:111: void numberslong(unsigned long x){
+;	---------------------------------
+; Function numberslong
+; ---------------------------------
+_numberslong::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+	ld	hl, #-31
+	add	hl, sp
+	ld	sp, hl
+;../../src/graphics.c:115: do {
+	ld	hl, #0
+	add	hl, sp
+	ld	-6 (ix), l
+	ld	-5 (ix), h
+	xor	a, a
+	ld	-2 (ix), a
+	ld	-1 (ix), a
+00101$:
+;../../src/graphics.c:116: out[i]=x % 10 + '0';
+	ld	a, -6 (ix)
+	add	a, -2 (ix)
+	ld	-4 (ix), a
+	ld	a, -5 (ix)
+	adc	a, -1 (ix)
+	ld	-3 (ix), a
+	ld	hl, #0x0000
+	push	hl
+	ld	hl, #0x000a
+	push	hl
+	ld	l, 6 (ix)
+	ld	h, 7 (ix)
+	push	hl
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+	push	hl
+	call	__modulong
+	pop	af
+	pop	af
+	pop	af
+	pop	af
+	ld	a, l
+	add	a, #0x30
+	ld	l, -4 (ix)
+	ld	h, -3 (ix)
+	ld	(hl), a
+;../../src/graphics.c:117: i+=1;
+	inc	-2 (ix)
+	jr	NZ, 00132$
+	inc	-1 (ix)
+00132$:
+;../../src/graphics.c:118: } while((x /= 10) > 0);
+	ld	hl, #0x0000
+	push	hl
+	ld	hl, #0x000a
+	push	hl
+	ld	l, 6 (ix)
+	ld	h, 7 (ix)
+	push	hl
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+	push	hl
+	call	__divulong
+	pop	af
+	pop	af
+	pop	af
+	pop	af
+	ld	c, l
+	ld	b, h
+	ld	4 (ix), c
+	ld	5 (ix), b
+	ld	6 (ix), e
+	ld	7 (ix), d
+	ld	a, d
+	or	a, e
+	or	a, b
+	or	a, c
+	jr	NZ, 00101$
+;../../src/graphics.c:119: i--;
+	ld	c, -2 (ix)
+	ld	b, -1 (ix)
+	dec	bc
+00106$:
+;../../src/graphics.c:120: for(;i>=0; i--){
+	bit	7, b
+	jr	NZ, 00108$
+;../../src/graphics.c:121: printc(out[i]);
+	ld	l, -6 (ix)
+	ld	h, -5 (ix)
+	add	hl, bc
+	ld	a, (hl)
+	push	bc
+	push	af
+	inc	sp
+	call	_printc
+	inc	sp
+	pop	bc
+;../../src/graphics.c:120: for(;i>=0; i--){
+	dec	bc
+	jr	00106$
+00108$:
+;../../src/graphics.c:124: }
+	ld	sp, ix
+	pop	ix
+	ret
 ;../../src/graphics.c:171: void swap(){
 ;	---------------------------------
 ; Function swap
@@ -672,342 +712,571 @@ _init_graphics::
 	ld	(hl), #0x93
 ;../../src/graphics.c:251: }
 	ret
-;main.c:30: int FixAng(int a){
+;../../src/fixedpoint.h:38: fixedpt FXmult(fixedpt* a, fixedpt* b){
 ;	---------------------------------
-; Function FixAng
+; Function FXmult
 ; ---------------------------------
-_FixAng::
+_FXmult::
 	push	ix
 	ld	ix,#0
 	add	ix,sp
-;main.c:31: if(a>359) 
-	ld	a, #0x67
-	cp	a, 4 (ix)
-	ld	a, #0x01
-	sbc	a, 5 (ix)
-	jp	PO, 00117$
-	xor	a, #0x80
-00117$:
-	jp	P, 00102$
-;main.c:32: a-=360;
-	ld	a, 4 (ix)
-	add	a, #0x98
-	ld	4 (ix), a
-	ld	a, 5 (ix)
-	adc	a, #0xfe
-	ld	5 (ix), a
-00102$:
-;main.c:33: if(a<0)
-	bit	7, 5 (ix)
-	jr	Z, 00104$
-;main.c:34: a+=360;
-	ld	a, 4 (ix)
-	add	a, #0x68
-	ld	4 (ix), a
-	ld	a, 5 (ix)
-	adc	a, #0x01
-	ld	5 (ix), a
-00104$:
-;main.c:35: return a;
+	ld	hl, #-16
+	add	hl, sp
+	ld	sp, hl
+;../../src/fixedpoint.h:39: return fixedpt_xmul(*a, *b);
 	ld	l, 4 (ix)
 	ld	h, 5 (ix)
-;main.c:36: }
-	pop	ix
-	ret
-;main.c:114: float fltA(int ang){
-;	---------------------------------
-; Function fltA
-; ---------------------------------
-_fltA::
-	push	ix
-;main.c:115: return ((float)ang)/100;
-	ld	hl, #0 + 4
-	add	hl, sp
 	ld	c, (hl)
 	inc	hl
 	ld	b, (hl)
+	inc	hl
+	ld	e, (hl)
+	inc	hl
+	ld	a, (hl)
+	inc	sp
+	inc	sp
 	push	bc
-	call	___sint2fs
+	ld	-14 (ix), e
+	ld	-13 (ix), a
+	rla
+	sbc	a, a
+	ld	-12 (ix), a
+	ld	-11 (ix), a
+	ld	-10 (ix), a
+	ld	-9 (ix), a
+	ld	l, 6 (ix)
+	ld	h, 7 (ix)
+	ld	c, (hl)
+	inc	hl
+	ld	b, (hl)
+	inc	hl
+	ld	e, (hl)
+	inc	hl
+	ld	a, (hl)
+	ld	-8 (ix), c
+	ld	-7 (ix), b
+	ld	-6 (ix), e
+	ld	-5 (ix), a
+	rla
+	sbc	a, a
+	ld	-4 (ix), a
+	ld	-3 (ix), a
+	ld	-2 (ix), a
+	ld	-1 (ix), a
+	ld	l, a
+	ld	h, a
+	push	hl
+	ld	l, -4 (ix)
+	ld	h, -3 (ix)
+	push	hl
+	ld	l, -6 (ix)
+	ld	h, -5 (ix)
+	push	hl
+	ld	l, -8 (ix)
+	ld	h, -7 (ix)
+	push	hl
+	ld	l, -10 (ix)
+	ld	h, -9 (ix)
+	push	hl
+	ld	l, -12 (ix)
+	ld	h, -11 (ix)
+	push	hl
+	ld	l, -14 (ix)
+	ld	h, -13 (ix)
+	push	hl
+	ld	l, -16 (ix)
+	ld	h, -15 (ix)
+	push	hl
+	ld	hl, #0x0018
+	add	hl, sp
+	push	hl
+	call	__mullonglong
+	ld	hl, #18
+	add	hl, sp
+	ld	sp, hl
+	ld	b, #0x08
+00103$:
+	sra	-1 (ix)
+	rr	-2 (ix)
+	rr	-3 (ix)
+	rr	-4 (ix)
+	rr	-5 (ix)
+	rr	-6 (ix)
+	rr	-7 (ix)
+	rr	-8 (ix)
+	djnz	00103$
+	ld	l, -8 (ix)
+	ld	h, -7 (ix)
+	ld	e, -6 (ix)
+	ld	d, -5 (ix)
+;../../src/fixedpoint.h:40: }
+	ld	sp, ix
+	pop	ix
+	ret
+;../../src/fixedpoint.h:41: fixedpt FXdiv(fixedpt* a, fixedpt* b){
+;	---------------------------------
+; Function FXdiv
+; ---------------------------------
+_FXdiv::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+	ld	hl, #-16
+	add	hl, sp
+	ld	sp, hl
+;../../src/fixedpoint.h:42: return fixedpt_xdiv(*a, *b);
+	ld	l, 4 (ix)
+	ld	h, 5 (ix)
+	ld	c, (hl)
+	inc	hl
+	ld	b, (hl)
+	inc	hl
+	ld	e, (hl)
+	inc	hl
+	ld	a, (hl)
+	ld	-8 (ix), c
+	ld	-7 (ix), b
+	ld	-6 (ix), e
+	ld	-5 (ix), a
+	rla
+	sbc	a, a
+	ld	-4 (ix), a
+	ld	-3 (ix), a
+	ld	-2 (ix), a
+	ld	-1 (ix), a
+	ld	a, -8 (ix)
+	ld	-15 (ix), a
+	ld	a, -7 (ix)
+	ld	-14 (ix), a
+	ld	a, -6 (ix)
+	ld	-13 (ix), a
+	ld	a, -5 (ix)
+	ld	-12 (ix), a
+	ld	a, -4 (ix)
+	ld	-11 (ix), a
+	ld	a, -3 (ix)
+	ld	-10 (ix), a
+	ld	a, -2 (ix)
+	ld	-9 (ix), a
+	ld	-16 (ix), #0
+	ld	l, 6 (ix)
+	ld	h, 7 (ix)
+	ld	c, (hl)
+	inc	hl
+	ld	b, (hl)
+	inc	hl
+	ld	e, (hl)
+	inc	hl
+	ld	a, (hl)
+	ld	-8 (ix), c
+	ld	-7 (ix), b
+	ld	-6 (ix), e
+	ld	-5 (ix), a
+	rla
+	sbc	a, a
+	ld	-4 (ix), a
+	ld	-3 (ix), a
+	ld	-2 (ix), a
+	ld	-1 (ix), a
+	ld	l, a
+	ld	h, a
+	push	hl
+	ld	l, -4 (ix)
+	ld	h, -3 (ix)
+	push	hl
+	ld	l, -6 (ix)
+	ld	h, -5 (ix)
+	push	hl
+	ld	l, -8 (ix)
+	ld	h, -7 (ix)
+	push	hl
+	ld	l, -10 (ix)
+	ld	h, -9 (ix)
+	push	hl
+	ld	l, -12 (ix)
+	ld	h, -11 (ix)
+	push	hl
+	ld	l, -14 (ix)
+	ld	h, -13 (ix)
+	push	hl
+	ld	l, -16 (ix)
+	ld	h, -15 (ix)
+	push	hl
+	ld	hl, #0x0018
+	add	hl, sp
+	push	hl
+	call	__divslonglong
+	ld	hl, #18
+	add	hl, sp
+	ld	sp, hl
+	ld	l, -8 (ix)
+	ld	h, -7 (ix)
+	ld	e, -6 (ix)
+	ld	d, -5 (ix)
+;../../src/fixedpoint.h:43: }
+	ld	sp, ix
+	pop	ix
+	ret
+;../../src/fixedpoint.h:44: fixedpt FXabs(fixedpt a){
+;	---------------------------------
+; Function FXabs
+; ---------------------------------
+_FXabs::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+;../../src/fixedpoint.h:45: return fixedpt_abs(a);
+	bit	7, 7 (ix)
+	jr	Z, 00103$
+	xor	a, a
+	sub	a, 4 (ix)
+	ld	c, a
+	ld	a, #0x00
+	sbc	a, 5 (ix)
+	ld	b, a
+	ld	a, #0x00
+	sbc	a, 6 (ix)
+	ld	e, a
+	ld	a, #0x00
+	sbc	a, 7 (ix)
+	ld	d, a
+	jr	00104$
+00103$:
+	ld	c, 4 (ix)
+	ld	b, 5 (ix)
+	ld	e, 6 (ix)
+	ld	d, 7 (ix)
+00104$:
+	ld	l, c
+	ld	h, b
+;../../src/fixedpoint.h:46: }
+	pop	ix
+	ret
+;../../src/fixedpoint.h:47: void _intstr(fixedpt* inp, char* out, char* ecount){
+;	---------------------------------
+; Function _intstr
+; ---------------------------------
+__intstr::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+	ld	hl, #-19
+	add	hl, sp
+	ld	sp, hl
+;../../src/fixedpoint.h:48: fixedpt inp2 = *inp;
+	ld	e, 4 (ix)
+	ld	d, 5 (ix)
+	ld	hl, #0x000a
+	add	hl, sp
+	ex	de, hl
+	ld	bc, #0x0004
+	ldir
+;../../src/fixedpoint.h:50: char i = 0;
+	ld	-5 (ix), #0
+;../../src/fixedpoint.h:52: do {
+	ld	hl, #0
+	add	hl, sp
+	ld	-4 (ix), l
+	ld	-3 (ix), h
+00101$:
+;../../src/fixedpoint.h:53: temp[i]=inp2 % 10 + '0';
+	ld	a, -4 (ix)
+	add	a, -5 (ix)
+	ld	-2 (ix), a
+	ld	a, -3 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	hl, #0x0000
+	push	hl
+	ld	hl, #0x000a
+	push	hl
+	ld	l, -7 (ix)
+	ld	h, -6 (ix)
+	push	hl
+	ld	l, -9 (ix)
+	ld	h, -8 (ix)
+	push	hl
+	call	__modslong
+	pop	af
+	pop	af
+	pop	af
+	pop	af
+	ld	a, l
+	add	a, #0x30
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), a
+;../../src/fixedpoint.h:54: i+=1;
+	inc	-5 (ix)
+;../../src/fixedpoint.h:55: } while((inp2 /= 10) > 0);
+	ld	hl, #0x0000
+	push	hl
+	ld	hl, #0x000a
+	push	hl
+	ld	l, -7 (ix)
+	ld	h, -6 (ix)
+	push	hl
+	ld	l, -9 (ix)
+	ld	h, -8 (ix)
+	push	hl
+	call	__divslong
+	pop	af
+	pop	af
+	pop	af
 	pop	af
 	ld	c, l
 	ld	b, h
-	ld	hl, #0x42c8
-	push	hl
-	ld	hl, #0x0000
-	push	hl
-	push	de
-	push	bc
-	call	___fsdiv
-	pop	af
-	pop	af
-	pop	af
-	pop	af
-	ld	c,l
-;main.c:116: }
+	ld	-9 (ix), c
+	ld	-8 (ix), b
+	ld	-7 (ix), e
+	ld	-6 (ix), d
+	xor	a, a
+	cp	a, c
+	sbc	a, b
+	ld	a, #0x00
+	sbc	a, e
+	ld	a, #0x00
+	sbc	a, d
+	jp	PO, 00129$
+	xor	a, #0x80
+00129$:
+	jp	M, 00101$
+;../../src/fixedpoint.h:59: while (i != 0){
+	ld	c, -5 (ix)
+00104$:
+	ld	a, c
+	or	a, a
+	jr	Z, 00107$
+;../../src/fixedpoint.h:60: i--;
+	dec	c
+;../../src/fixedpoint.h:61: char v =*ecount;
+	ld	e, 8 (ix)
+	ld	d, 9 (ix)
+	ld	a, (de)
+	ld	b, a
+;../../src/fixedpoint.h:62: out[ v ] = temp[i];
+	ld	a, 6 (ix)
+	add	a, b
+	ld	-2 (ix), a
+	ld	a, 7 (ix)
+	adc	a, #0x00
+	ld	-1 (ix), a
+	ld	a, -4 (ix)
+	add	a, c
+	ld	l, a
+	ld	a, -3 (ix)
+	adc	a, #0x00
+	ld	h, a
+	ld	a, (hl)
+	ld	l, -2 (ix)
+	ld	h, -1 (ix)
+	ld	(hl), a
+;../../src/fixedpoint.h:63: *ecount = v+1;
+	ld	a, b
+	inc	a
+	ld	(de), a
+	jr	00104$
+00107$:
+;../../src/fixedpoint.h:66: }
+	ld	sp, ix
 	pop	ix
 	ret
-;main.c:117: void main() {
+;../../src/fixedpoint.h:67: void FXstr(fixedpt num, char* out){
+;	---------------------------------
+; Function FXstr
+; ---------------------------------
+_FXstr::
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+	ld	hl, #-16
+	add	hl, sp
+	ld	sp, hl
+;../../src/fixedpoint.h:69: char i = 0;
+	ld	-2 (ix), #0
+;../../src/fixedpoint.h:70: fixedpt x = num>> FIXEDPT_FBITS;
+	ld	c, 4 (ix)
+	ld	b, 5 (ix)
+	ld	e, 6 (ix)
+	ld	d, 7 (ix)
+	ld	a, #0x08
+00124$:
+	sra	d
+	rr	e
+	rr	b
+	rr	c
+	dec	a
+	jr	NZ, 00124$
+	inc	sp
+	inc	sp
+	push	bc
+	ld	-14 (ix), e
+	ld	-13 (ix), d
+;../../src/fixedpoint.h:73: if (x<0){
+	bit	7, d
+	jr	Z, 00102$
+;../../src/fixedpoint.h:74: x=-x;
+	xor	a, a
+	sub	a, c
+	ld	c, a
+	ld	a, #0x00
+	sbc	a, b
+	ld	b, a
+	ld	hl, #0x0000
+	sbc	hl, de
+	ex	de, hl
+	inc	sp
+	inc	sp
+	push	bc
+	ld	-14 (ix), e
+	ld	-13 (ix), d
+;../../src/fixedpoint.h:75: out[i] = '-';
+	ld	c, 8 (ix)
+	ld	b, 9 (ix)
+	ld	a, #0x2d
+	ld	(bc), a
+;../../src/fixedpoint.h:76: i++;
+	inc	-2 (ix)
+00102$:
+;../../src/fixedpoint.h:79: _intstr(&x, out, &i);
+	ld	hl, #14
+	add	hl, sp
+	ex	de, hl
+	ld	c, e
+	ld	b, d
+	ld	hl, #0
+	add	hl, sp
+	push	bc
+	ex	de, hl
+	ld	l, 8 (ix)
+	ld	h, 9 (ix)
+	push	hl
+	push	de
+	call	__intstr
+	ld	hl, #6
+	add	hl, sp
+	ld	sp, hl
+;../../src/fixedpoint.h:81: out[i] = '.';
+	ld	a, 8 (ix)
+	add	a, -2 (ix)
+	ld	c, a
+	ld	a, 9 (ix)
+	adc	a, #0x00
+	ld	l, c
+	ld	h, a
+	ld	(hl), #0x2e
+;../../src/fixedpoint.h:82: i++;
+	inc	-2 (ix)
+;../../src/fixedpoint.h:83: fixedpt ten = FIXEDPT_TEN;
+	ld	-8 (ix), #0x00
+	ld	-7 (ix), #0x0a
+	xor	a, a
+	ld	-6 (ix), a
+	ld	-5 (ix), a
+;../../src/fixedpoint.h:85: while ((frac = num & ((1 << FIXEDPT_FBITS) - 1)) != 0 ){
+	ld	a, -2 (ix)
+	ld	-1 (ix), a
+00103$:
+	ld	c, 4 (ix)
+	ld	b, #0x00
+	ld	de, #0x0000
+	ld	-12 (ix), c
+	ld	-11 (ix), b
+	ld	-10 (ix), e
+	ld	-9 (ix), d
+;../../src/fixedpoint.h:88: out[i] = ( num>>FIXEDPT_FBITS )+'0';
+	ld	a, 8 (ix)
+	add	a, -1 (ix)
+	ld	-4 (ix), a
+	ld	a, 9 (ix)
+	adc	a, #0x00
+	ld	-3 (ix), a
+;../../src/fixedpoint.h:85: while ((frac = num & ((1 << FIXEDPT_FBITS) - 1)) != 0 ){
+	ld	a, d
+	or	a, e
+	or	a, b
+	or	a, c
+	jr	Z, 00111$
+;../../src/fixedpoint.h:86: num = FXmult(&frac, &ten);
+	ld	hl, #8
+	add	hl, sp
+	ex	de, hl
+	ld	c, e
+	ld	b, d
+	ld	hl, #4
+	add	hl, sp
+	push	bc
+	push	hl
+	call	_FXmult
+	pop	af
+	pop	af
+	ld	c, l
+	ld	b, h
+	ld	4 (ix), c
+	ld	5 (ix), b
+	ld	6 (ix), e
+	ld	7 (ix), d
+;../../src/fixedpoint.h:88: out[i] = ( num>>FIXEDPT_FBITS )+'0';
+	ld	a, b
+	add	a, #0x30
+	ld	l, -4 (ix)
+	ld	h, -3 (ix)
+	ld	(hl), a
+;../../src/fixedpoint.h:89: i++;
+	inc	-1 (ix)
+	ld	a, -1 (ix)
+	ld	-2 (ix), a
+	jr	00103$
+00111$:
+	ld	a, -1 (ix)
+	ld	-2 (ix), a
+;../../src/fixedpoint.h:95: out[i] = 0;
+	ld	l, -4 (ix)
+	ld	h, -3 (ix)
+	ld	(hl), #0x00
+;../../src/fixedpoint.h:97: }
+	ld	sp, ix
+	pop	ix
+	ret
+;main.c:25: void main() {
 ;	---------------------------------
 ; Function main
 ; ---------------------------------
 _main::
-;main.c:118: px=150; py=400; pa=100;
-	ld	hl, #_px
-	ld	(hl), #0x00
-	inc	hl
-	ld	(hl), #0x00
-	inc	hl
-	ld	(hl), #0x16
-	inc	hl
-	ld	(hl), #0x43
-	ld	hl, #_py
-	ld	(hl), #0x00
-	inc	hl
-	ld	(hl), #0x00
-	inc	hl
-	ld	(hl), #0xc8
-	inc	hl
-	ld	(hl), #0x43
-	ld	hl, #_pa
-	ld	(hl), #0x00
-	inc	hl
-	ld	(hl), #0x00
-	inc	hl
-	ld	(hl), #0xc8
-	inc	hl
-	ld	(hl), #0x42
-;main.c:119: pdx=fltA(getCos(pa)); pdy=-fltA(getSin(pa)); 
-	ld	hl, #0x0064
-	push	hl
-	call	_getCos
-	ex	(sp),hl
-	call	_fltA
-	pop	af
-	ld	c, l
-	ld	b, h
-	ld	hl, #_pdx
-	ld	(hl), c
-	inc	hl
-	ld	(hl), b
-	inc	hl
-	ld	(hl), e
-	inc	hl
-	ld	(hl), d
-	ld	hl, (_pa + 2)
-	push	hl
-	ld	hl, (_pa)
-	push	hl
-	call	___fs2sint
-	pop	af
-	ex	(sp),hl
-	call	_getSin
-	ex	(sp),hl
-	call	_fltA
-	pop	af
-	ld	c, l
-	ld	b, h
-	ld	a, d
-	xor	a,#0x80
-	ld	hl, #_pdy + 3
-	ld	(hl), a
-	ld	a, c
-	ld	(_pdy), a
-	ld	a, b
-	ld	(_pdy + 1), a
-	ld	a, e
-	ld	(_pdy + 2), a
-;main.c:126: __endasm;
-	ld	hl, #_map
-	ld	(hl), #<(__xinit__mapp)
-	inc	hl
-	ld	(hl), #>(__xinit__mapp)
-;main.c:129: clearscreen();
+	push	ix
+	ld	ix,#0
+	add	ix,sp
+	ld	hl, #-50
+	add	hl, sp
+	ld	sp, hl
+;main.c:26: clearscreen();
 	call	_clearscreen
-;main.c:130: resetcursor();
-	call	_resetcursor
-;main.c:131: init_graphics();
-	call	_init_graphics
-;main.c:133: getKey();
-;main.c:136: }
-	jp	_getKey
+;main.c:32: , (char*)&out);
+	ld	hl, #0
+	add	hl, sp
+	ex	de, hl
+	ld	c, e
+	ld	b, d
+	push	de
+	push	bc
+	ld	hl, #0x0000
+	push	hl
+	ld	hl, #0x0524
+	push	hl
+	call	_FXstr
+	ld	hl, #6
+	add	hl, sp
+	ld	sp, hl
+	call	_print
+	pop	af
+;main.c:35: getKey();
+	call	_getKey
+;main.c:38: }
+	ld	sp, ix
+	pop	ix
+	ret
 	.area _CODE
 	.area _INITIALIZER
 __xinit____cio__current_line:
 	.db #0x00	; 0
-__xinit__tans:
-	.dw #0x0000
-	.dw #0x0011
-	.dw #0x0024
-	.dw #0x0039
-	.dw #0x0053
-	.dw #0x0077
-	.dw #0x00ad
-	.dw #0x0112
-	.dw #0x0237
-	.dw #0x03e8
-	.dw #0xfdc9
-	.dw #0xfeee
-	.dw #0xff53
-	.dw #0xff89
-	.dw #0xffad
-	.dw #0xffc7
-	.dw #0xffdc
-	.dw #0xffef
-	.dw #0x0000
-	.dw #0x0011
-	.dw #0x0024
-	.dw #0x0039
-	.dw #0x0053
-	.dw #0x0077
-	.dw #0x00ad
-	.dw #0x0112
-	.dw #0x0237
-	.dw #0x03e8
-	.dw #0xfdc9
-	.dw #0xfeee
-	.dw #0xff53
-	.dw #0xff89
-	.dw #0xffad
-	.dw #0xffc7
-	.dw #0xffdc
-	.dw #0xffef
-__xinit__cosses:
-	.db #0x64	;  100	'd'
-	.db #0x62	;  98	'b'
-	.db #0x5d	;  93
-	.db #0x56	;  86	'V'
-	.db #0x4c	;  76	'L'
-	.db #0x40	;  64
-	.db #0x32	;  50	'2'
-	.db #0x22	;  34
-	.db #0x11	;  17
-	.db #0x00	;  0
-	.db #0xef	; -17
-	.db #0xde	; -34
-	.db #0xcf	; -49
-	.db #0xc0	; -64
-	.db #0xb4	; -76
-	.db #0xaa	; -86
-	.db #0xa3	; -93
-	.db #0x9e	; -98
-	.db #0x9c	; -100
-	.db #0x9e	; -98
-	.db #0xa3	; -93
-	.db #0xaa	; -86
-	.db #0xb4	; -76
-	.db #0xc0	; -64
-	.db #0xce	; -50
-	.db #0xde	; -34
-	.db #0xef	; -17
-	.db #0x00	;  0
-	.db #0x11	;  17
-	.db #0x22	;  34
-	.db #0x32	;  50	'2'
-	.db #0x40	;  64
-	.db #0x4c	;  76	'L'
-	.db #0x56	;  86	'V'
-	.db #0x5d	;  93
-	.db #0x62	;  98	'b'
-__xinit__sins:
-	.db #0x00	;  0
-	.db #0x11	;  17
-	.db #0x22	;  34
-	.db #0x31	;  49	'1'
-	.db #0x40	;  64
-	.db #0x4c	;  76	'L'
-	.db #0x56	;  86	'V'
-	.db #0x5d	;  93
-	.db #0x62	;  98	'b'
-	.db #0x64	;  100	'd'
-	.db #0x62	;  98	'b'
-	.db #0x5d	;  93
-	.db #0x56	;  86	'V'
-	.db #0x4c	;  76	'L'
-	.db #0x40	;  64
-	.db #0x31	;  49	'1'
-	.db #0x22	;  34
-	.db #0x11	;  17
-	.db #0x00	;  0
-	.db #0xef	; -17
-	.db #0xde	; -34
-	.db #0xce	; -50
-	.db #0xc0	; -64
-	.db #0xb4	; -76
-	.db #0xaa	; -86
-	.db #0xa3	; -93
-	.db #0x9e	; -98
-	.db #0x9c	; -100
-	.db #0x9e	; -98
-	.db #0xa3	; -93
-	.db #0xaa	; -86
-	.db #0xb4	; -76
-	.db #0xc0	; -64
-	.db #0xce	; -50
-	.db #0xde	; -34
-	.db #0xef	; -17
-__xinit__mapp:
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x01	; 1
 	.area _CABS (ABS)
