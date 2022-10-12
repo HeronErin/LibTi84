@@ -1,19 +1,17 @@
 LibTI84
 =====
 
-LibTI84 is a C library for TI-based calculators. It relies on SDCC and a bunch of tools to compile to the TI-84+.
+LibTI84 is a C library for TI-based calculators. It relies on SDCC and a bunch of tools to compile to the TI-84+. Its meant to be a "CE C/C++ Toolchain" for the ti-84+ non CE.
 
-The library itself consists of useful functions I'll add over time. Standard algorithms will stay close to the C stdlib, but glue functions (such as the IO ones in src/cio.h) most probably won't!
-
-It also has some functions for graphics in src/graphics.c that have been added. But graphics.c is a bad name for it as it also contains the wait function that waits int multiples of 1/8th of a secound.
+Many useful functions are available, and many graphics libraries. But this project has been me adding to it as I learn something new about the TI-84, so its not that organized and I need to write some documentation. If you want to use this, look at the src, It is a mess. I plan on doing some reorganization but don't rely on it. Look in games/ for examples if you want to know how to use my functions.
 
 
-If you want to play my horrible tetris clone you can download it [here](https://github.com/HeronErin/LibTi84/raw/master/games/tetris/tetris.8xp)
+If you want to play my completed games goto releases.
 
 Required preprocesser settings
 -----------
 
-To save storage space use #define to tell what function you wish to use. Include the setting.h for automatic defining dependancies required by other moduels. And remember to #define before all the includes.
+To save storage space use #define to tell what function you wish to use. Include the setting.h for automatic defining dependancies required by other moduels. And remember to #define before all the includes. 
 
 I'm not going to state them all here so look at the src for all the functions avalible. 
 
