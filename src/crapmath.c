@@ -56,8 +56,12 @@ unsigned long isqrt(unsigned int x){
 #endif
 
 
-
+//// slong is not efficent but is the best we have for long numbers.
+//// try to use int or better char if you can to save space and time
 #define slong signed long
+
+
+
 #ifdef USE_DEG_2_RAD
 slong deg2rad(slong r){
     return (3141/18)*r/10;
@@ -86,6 +90,8 @@ slong poww(slong base, slong power){
     return base2;
 }
 #endif
+////// cos and sin funcs arn't great
+////// use _pre function for lookup tables instead
 #ifdef USE_SIN_COS
 slong sine(slong x){
     while (x < -314)
@@ -124,6 +130,12 @@ int absint(int x){
     return x;
 }
 #endif
+
+/// tan sin and cos lookup table functions
+/// unfortinatly sdcc can't handle global
+/// constants so you need to use asm to
+/// access it. Thats what __tanBypass is for
+
 
 #pragma disable_warning 59
 #pragma disable_warning 85
@@ -220,6 +232,12 @@ struct Vec2{
     slong y;
 };
 #endif
+
+
+
+/// project it old, its all valid math
+/// use if you need but not optimized 
+
 #ifdef PROJ_NO_ROT
 void projectNoRot(slong x, slong z, slong y, struct Vec2 *out){
     x = camPos->x - x;
