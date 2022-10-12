@@ -1,5 +1,10 @@
 #pragma once
 
+
+// experimental, quite large, wouldn't recommend 
+
+
+// taken and modifed from https://sourceforge.net/p/fixedptc/code/ci/default/tree/fixedptc.h
 #ifdef USE_FIXED
 
 #include <stdint.h>
