@@ -12,3 +12,6 @@ objcopy -Iihex -Obinary $OUT_NAME.ihx $OUT_NAME.bin
 
 
 rm $OUT_NAME.lk $OUT_NAME.lst $OUT_NAME.map $OUT_NAME.noi $OUT_NAME.rel $OUT_NAME.sym tios_crt0.rel
+
+
+../../rabbitsign -t 8xk -g -f $OUT_NAME.bin
