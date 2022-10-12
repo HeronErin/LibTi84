@@ -36,9 +36,11 @@ In case you happen to want to make it work, here's some tips:
 Some useful resource
 ------------
 * [Best guide to z80 asm](https://taricorp.gitlab.io/83pa28d/index.html)
+* [Some usefull bcalls](http://jgmalcolm.com/z80/intermediate/romc)
 * [wikiti for almost all bcalls and ram addresses](https://wikiti.brandonw.net/index.php?title=Calculator_Documentation)
 * [Hub of ti dev community](https://www.cemetech.net/tools/ti84p)
 * [The original LibTi I build from.](https://github.com/azertyfun/LibTI)
+
 
 
 
