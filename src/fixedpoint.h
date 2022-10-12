@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef USE_FIXED
+
 #include <stdint.h>
 
 typedef int32_t fixedpt;
@@ -95,3 +98,5 @@ void FXstr(fixedpt num, char* out){
     out[i] = 0;
 
 }
+
+#endif
