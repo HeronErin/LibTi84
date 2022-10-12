@@ -1,6 +1,10 @@
 #pragma once
+
+
+
 #define _LCD_BUSY_QUICK 0x000B
 
+// get bottom bytes of realtime
 #ifdef USE_GET_TIME
 unsigned int getTime(){ 
     __asm
@@ -12,6 +16,8 @@ unsigned int getTime(){
 }
 #endif
 
+// https://wikiti.brandonw.net/index.php?title=83Plus:Ports:20
+// 0 for normal mode (8hz) 1 for turbo mode (16hz)
 #ifdef USE_CPU_SPEED
 char getCpuSpeed(){
     __asm
@@ -27,6 +33,8 @@ void setCpuSpeed(char speed){
 }
 #endif
 
+/// CAREFULL THIS MY BREAK YOUR LCD
+/// IM NOT 100% SURE ITS FULLY SAFE 
 #ifdef USE_CUSTOM_LCD
 void lcdCmode(char in){
     __asm
