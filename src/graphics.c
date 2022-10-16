@@ -108,6 +108,8 @@ void number(int x){
     }
 
 }
+#endif
+#ifdef RENDER_NUMS_LONG
 void numberslong(unsigned long x){
     int i = 0;
 

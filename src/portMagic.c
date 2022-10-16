@@ -33,8 +33,20 @@ void setCpuSpeed(char speed){
 }
 #endif
 
+
+
+
+
+
+
+
+
+
+
 /// CAREFULL THIS MY BREAK YOUR LCD
 /// IM NOT 100% SURE ITS FULLY SAFE 
+
+
 #ifdef USE_CUSTOM_LCD
 void lcdCmode(char in){
     __asm
