@@ -1,4 +1,4 @@
-#DEPRECATED!!!
+# DEPRECATED!!!
 
 Please use the new [TiConstructor](https://github.com/HeronErin/TiConstructor) instead of this! It May have a bit less features, but is overall less bloated and allows for building as both flash apps and programs dynamicly.
 
